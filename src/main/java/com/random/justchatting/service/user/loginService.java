@@ -26,7 +26,7 @@ public class loginService {
             User newUser = userRepository.save(user);
             return newUser.getId();
         }
-    }
+}
 
     public UserPrefer getPreference(Long userId){
 

@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 
 @Entity(name="Users")
 @Getter
-@Builder
+@NoArgsConstructor
 public class UserEntity {
 
     @Id
@@ -19,4 +19,11 @@ public class UserEntity {
     private String nickName;
     private String mainCharacter;
 
+    @Builder
+    public UserEntity(Long id, String apiKey, String nickName, String mainCharacter) {
+        this.id = id;
+        this.apiKey = apiKey;
+        this.nickName = nickName;
+        this.mainCharacter = mainCharacter;
+    }
 }

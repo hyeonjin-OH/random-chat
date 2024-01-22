@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 
 @Entity(name="users_prefer")
 @Getter
-@Builder
+@NoArgsConstructor
 public class UserPreferEntity {
 
     @Id
@@ -22,6 +22,12 @@ public class UserPreferEntity {
     private String preferRole;
     private String preferTime;
 
-
-
+    @Builder
+    public UserPreferEntity(Long id, Long userId, String preferLevel, String preferRole, String preferTime) {
+        this.id = id;
+        this.userId = userId;
+        this.preferLevel = preferLevel;
+        this.preferRole = preferRole;
+        this.preferTime = preferTime;
+    }
 }

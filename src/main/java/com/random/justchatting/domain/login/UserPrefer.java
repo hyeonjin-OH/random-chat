@@ -9,13 +9,22 @@ import lombok.Setter;
 
 @Getter
 @Setter
-@Builder
+@NoArgsConstructor
 public class UserPrefer {
     private Long id;
     private Long userId;
     private String preferLevel;
     private String preferRole;
     private String preferTime;
+
+    @Builder
+    public UserPrefer(Long id, Long userId, String preferLevel, String preferRole, String preferTime) {
+        this.id = id;
+        this.userId = userId;
+        this.preferLevel = preferLevel;
+        this.preferRole = preferRole;
+        this.preferTime = preferTime;
+    }
 
     public static UserPreferEntity toEntity(UserPrefer prefer){
         return UserPreferEntity.builder()

@@ -63,7 +63,7 @@
 						,method: "post"
 						,data:{
 							id: null,
-							apiKey: apiKey,
+							apiKey: $(".api-key").val(),
 							nickName: value.CharacterName,
 							mainCharacter: value.CharacterName
 						}
@@ -84,7 +84,7 @@
 					,method: "get"
 					,success: function(data){
 						console.log("GET 후 데이터: " + data)
-						window.location.replace(":/randomchat/preferenceForm.html")
+						window.location.replace("http://localhost:8080/randomchat/preferenceForm.html")
 					}
 					,error: function(req){
 						console.log("GET 후 에러: " + req)

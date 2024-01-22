@@ -1,0 +1,17 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/random-chat
+    #url: jdbc:mysql://database-1.ccgjlcxoivyr.ap-northeast-2.rds.amazonaws.com:3306/shopping
+    username: root
+    password: root123
+
+  jpa:
+    database-platform: org.hibernate.dialect.MySQL8Dialect
+---
+jwt:
+  secret_key: 342fdskjhfsdiumnbvxuicvwebvbvjoifjioejoiewjwef@!djsfhdsjkcvoujvkcxnvuvxojoxpvjew9vuw9esfhkjsdaudauida
+  access:
+    expiration: 3600000000
+  refresh:
+    expiration: 1209600000000

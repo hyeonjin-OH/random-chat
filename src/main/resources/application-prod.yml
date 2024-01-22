@@ -1,0 +1,16 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    #url: jdbc:mysql://database-1.ccgjlcxoivyr.ap-northeast-2.rds.amazonaws.com:3306/shopping
+    url: ${rds_mysql_url}
+    username: ${rds_mysql_name}
+    password: ${rds_mysql_secret}
+  session:
+    store-type: redis
+---
+jwt:
+  secret_key: ${jwt_secret}
+  access:
+    expiration: 3600000000
+  refresh:
+    expiration: 1209600000000

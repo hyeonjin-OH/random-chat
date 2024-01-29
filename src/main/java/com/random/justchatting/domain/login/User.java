@@ -8,7 +8,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-@Builder
+@NoArgsConstructor
 public class User {
 
     public Long id;
@@ -16,6 +16,13 @@ public class User {
     public String nickName;
     public String mainCharacter;
 
+    @Builder
+    public User(Long id, String apiKey, String nickName, String mainCharacter) {
+        this.id = id;
+        this.apiKey = apiKey;
+        this.nickName = nickName;
+        this.mainCharacter = mainCharacter;
+    }
 
     public static UserEntity toEntity(User user){
         return UserEntity.builder()

@@ -18,84 +18,84 @@
 <div>
 	<span class = "api-result"> -</span>
 </div>
-<script>
-	$(document).ready(function(){
-		$(".register-apikey").on("click", function(e){
-			e.preventDefault();
+<!--<script>-->
+<!--	$(document).ready(function(){-->
+<!--		$(".register-apikey").on("click", function(e){-->
+<!--			e.preventDefault();-->
 
-			var charName = $(".main-character-name").val();
-			var apiKey = "bearer " + $(".api-key").val();
-			var apiUrl = "https://developer-lostark.game.onstove.com/characters/"+charName+"/siblings"
+<!--			var charName = $(".main-character-name").val();-->
+<!--			var apiKey = "bearer " + $(".api-key").val();-->
+<!--			var apiUrl = "https://developer-lostark.game.onstove.com/characters/"+charName+"/siblings"-->
 
-			const promise = new Promise((resolve, reject)=>{
-				$.ajax({
-					url : apiUrl
-					,method : "get"
-					,beforeSend : function(xhr){
-						xhr.setRequestHeader('accept', 'application/json');
-						xhr.setRequestHeader('authorization', apiKey);
-					}
-					,success : function(data){
-						
-						if(data == null){
-							$(".api-result").text("존재하지 않는 캐릭터명입니다.");
-							reject("존재하지 않는 캐릭터명입니다.")
-						}
-						
-						data.forEach(function(el, idx){
-							if(el.CharacterName == charName){
-								$(".api-result").text(JSON.stringify(data[idx]));
-								resolve(data[idx])
-							}
-						});
-					}
-					,error : function(req, status, err){
-						$(".api-result").text("유효하지 않은 API Key 입니다.");
-						reject("유효하지 않은 API Key 입니다.")
-					}
-				});
-			});
-			
-			promise.then((value)=>{
-				const promise2 = new Promise((resolve, reject)=>{
-					$.ajax({
-						url: "/api/v1/register"
-						,method: "post"
-						,data:{
-							id: null,
-							apiKey: $(".api-key").val(),
-							nickName: value.CharacterName,
-							mainCharacter: value.CharacterName
-						}
-						,datatype:"JSON"
-						,success: function(data2){
-							console.log("POST 반환 데이터: " + data2);
-							resolve(data2)
-						}
-					});
-				});
-				return promise2;
-			})
-			.then((value)=>{
-				redirUrl = "api/v1/prefer/"+value
-				console.log("URL: "+redirUrl);
-				$.ajax({
-					url: redirUrl
-					,method: "get"
-					,success: function(data){
-						console.log("GET 후 데이터: " + data)
-						window.location.replace("http://localhost:8080/randomchat/preferenceForm.html")
-					}
-					,error: function(req){
-						console.log("GET 후 에러: " + req)
-					}
-				})
-				
-			});
+<!--			const promise = new Promise((resolve, reject)=>{-->
+<!--				$.ajax({-->
+<!--					url : apiUrl-->
+<!--					,method : "get"-->
+<!--					,beforeSend : function(xhr){-->
+<!--						xhr.setRequestHeader('accept', 'application/json');-->
+<!--						xhr.setRequestHeader('authorization', apiKey);-->
+<!--					}-->
+<!--					,success : function(data){-->
+<!--						-->
+<!--						if(data == null){-->
+<!--							$(".api-result").text("존재하지 않는 캐릭터명입니다.");-->
+<!--							reject("존재하지 않는 캐릭터명입니다.")-->
+<!--						}-->
+<!--						-->
+<!--						data.forEach(function(el, idx){-->
+<!--							if(el.CharacterName == charName){-->
+<!--								$(".api-result").text(JSON.stringify(data[idx]));-->
+<!--								resolve(data[idx])-->
+<!--							}-->
+<!--						});-->
+<!--					}-->
+<!--					,error : function(req, status, err){-->
+<!--						$(".api-result").text("유효하지 않은 API Key 입니다.");-->
+<!--						reject("유효하지 않은 API Key 입니다.")-->
+<!--					}-->
+<!--				});-->
+<!--			});-->
+<!--			-->
+<!--			promise.then((value)=>{-->
+<!--				const promise2 = new Promise((resolve, reject)=>{-->
+<!--					$.ajax({-->
+<!--						url: "/api/v1/register"-->
+<!--						,method: "post"-->
+<!--						,data:{-->
+<!--							id: null,-->
+<!--							apiKey: $(".api-key").val(),-->
+<!--							nickName: value.CharacterName,-->
+<!--							mainCharacter: value.CharacterName-->
+<!--						}-->
+<!--						,datatype:"JSON"-->
+<!--						,success: function(data2){-->
+<!--							resolve(data2)-->
+<!--						}-->
+<!--					});-->
+<!--				});-->
+<!--				return promise2;-->
+<!--			})-->
+<!--			.then((value)=>{-->
+<!--				redirUrl = "/api/v1/prefer/"+value-->
+<!--				console.log("URL: "+redirUrl);-->
+<!--				$.ajax({-->
+<!--					url: redirUrl-->
+<!--					,method: "get"-->
+<!--					,data: {userId: value}-->
+<!--					,success: function(data3){-->
+<!--						console.log("GET 후 데이터: " + data3)-->
+<!--						//window.location.replace("randomchat/preferenceForm.html")-->
+<!--					}-->
+<!--					,error: function(req){-->
+<!--						console.log("GET 후 에러: " + req)-->
+<!--					}-->
+<!--				})-->
+<!--				-->
+<!--			});-->
 
-		});
-	});
-</script>
+<!--		});-->
+<!--	});-->
+<!--</script>-->
 
 </body>
 </html>

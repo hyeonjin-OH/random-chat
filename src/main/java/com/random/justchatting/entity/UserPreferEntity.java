@@ -1,12 +1,14 @@
 package com.random.justchatting.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import com.random.justchatting.config.IntegerListConverter;
+import com.random.justchatting.config.StringListConverter;
+import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.lang.reflect.Array;
+import java.util.List;
 
 @Entity(name="users_prefer")
 @Getter
@@ -18,15 +20,19 @@ public class UserPreferEntity {
     private Long id;
 
     private Long userId;
-    private String preferLevel;
-    private String preferRole;
-    private String preferTime;
+
+    @Convert(converter = IntegerListConverter.class)
+    private List<Integer> preferRaid;
+    @Convert(converter = IntegerListConverter.class)
+    private List<Integer> preferRole;
+    @Convert(converter = IntegerListConverter.class)
+    private List<Integer> preferTime;
 
     @Builder
-    public UserPreferEntity(Long id, Long userId, String preferLevel, String preferRole, String preferTime) {
+    public UserPreferEntity(Long id, Long userId, List<Integer> preferRaid, List<Integer> preferRole, List<Integer> preferTime) {
         this.id = id;
         this.userId = userId;
-        this.preferLevel = preferLevel;
+        this.preferRaid = preferRaid;
         this.preferRole = preferRole;
         this.preferTime = preferTime;
     }

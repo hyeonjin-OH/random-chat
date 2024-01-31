@@ -20,9 +20,23 @@ public class LoginServiceImpl {
             return findUser.getId();
         }
         else{
-            User newUser = userRepository.save(user);
-            return newUser.getId();
+            User newUser = User.createUId(user);
+            User savedUser = userRepository.save(newUser);
+            return savedUser.getId();
         }
     }
 
+    public String register(User user){
+
+        User findUser = userRepository.findByApiKey(user.getApiKey());
+
+        if (findUser != null){
+            return findUser.getUuId();
+        }
+        else{
+            User newUser = User.createUId(user);
+            User savedUser = userRepository.save(newUser);
+            return savedUser.getUuId();
+        }
+    }
 }

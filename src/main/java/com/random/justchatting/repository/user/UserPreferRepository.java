@@ -8,4 +8,5 @@ public interface UserPreferRepository {
 
     UserPrefer findByUserId(Long userid);
 
+     UserPrefer findByUId(String uId);
 }

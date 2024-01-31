@@ -25,7 +25,7 @@ public class loginController {
     @PostMapping("/register")
     public ResponseEntity<?> registerLostArk(@RequestBody User user){
         try{
-            Long userId = LoginServiceImpl.saveApiKey(user);
+            String userId = LoginServiceImpl.register(user);
 
             return ResponseEntity.ok().body(userId);
 
@@ -35,9 +35,9 @@ public class loginController {
     }
 
     @GetMapping("/prefer/{userId}")
-    public ResponseEntity<?> registerPreference(@PathVariable Long userId){
+    public ResponseEntity<?> registerPreference(@PathVariable String userId){
         try{
-            UserPrefer prefer = userService.getUserPreference(userId);
+            UserPrefer prefer = userService.getUserPreferenceByUId(userId);
             if (prefer != null){
                 return ResponseEntity.ok().body(prefer);
             }
@@ -52,7 +52,7 @@ public class loginController {
         }
     }
 
-    @PostMapping("/prefer/{userId}")
+    @PostMapping("/prefer")
     public ResponseEntity<?> registerPreference(@RequestBody UserPrefer prefer){
         try{
             UserPrefer newPrefer = userService.setUserPreference(prefer);

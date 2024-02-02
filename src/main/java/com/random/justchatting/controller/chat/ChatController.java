@@ -13,6 +13,8 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,9 +29,11 @@ public class ChatController {
     private final ChatService chatService;
 
 
-    @GetMapping("/waitingroom/{uId}")
-    public ResponseEntity<?> getWaitingRoom(@PathVariable String uId){
-        UserPrefer prefer = userService.getUserPreferenceByUId(uId);
+    @GetMapping("/waitingroom")
+    public ResponseEntity<?> getWaitingRoom(@AuthenticationPrincipal UserDetails user){
+        String uuId = user.getUsername();
+
+        UserPrefer prefer = userService.getUserPreferenceByUId(uuId);
         if (prefer != null){
             return ResponseEntity.ok().body(prefer);
         }
@@ -45,7 +49,7 @@ public class ChatController {
     }
 
     //채팅 홈
-    @GetMapping("/chattingroom/{userId}")
+    @GetMapping("/chattingroom")
     public ResponseEntity<?> getChattingRoom(@PathVariable String userId) {
         List<ChatRoom> rooms = chatService.findAllRoom(userId);
         return ResponseEntity.ok().body(rooms);

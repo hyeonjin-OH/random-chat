@@ -60,7 +60,7 @@ public class ChatRoom {
                 .roomKey(room.getRoomKey())
                 .createdTime(room.getCreatedTime())
                 .senderId(room.getSenderId())
-                .receiverId(room.getSenderId())
+                .receiverId(room.getReceiverId())
                 .build();
     }
 

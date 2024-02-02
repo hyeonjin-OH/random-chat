@@ -1,6 +1,7 @@
 package com.random.justchatting.controller.chat;
 
 import com.random.justchatting.domain.chat.ChatMessages;
+import com.random.justchatting.repository.chat.ChatRepository;
 import com.random.justchatting.repository.chat.ChatRoomRepository;
 import com.random.justchatting.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -22,10 +23,12 @@ public class MessageController {
 
     private final SimpMessageSendingOperations template;
     private final ChatRoomRepository chatRoomRepository;
+    private final ChatRepository chatRepository;
     private final UserRepository userRepository;
 
+
     @MessageMapping("/chat/enter")
-    public void enterUser(@Payload ChatMessages chat, SimpMessageHeaderAccessor headerAccessor) {
+    public void enterUser(ChatMessages chat, SimpMessageHeaderAccessor headerAccessor) {
 
         // 반환 결과를 socket session 에 userUUID 로 저장
         headerAccessor.getSessionAttributes().put("userUUID", chat.getSender());
@@ -34,12 +37,14 @@ public class MessageController {
 
         chat.setMessage("채팅방에 참여하였습니다.");
         template.convertAndSend("/sub/chat/room/" + chat.getRoomKey(), chat);
+        chatRepository.saveMessages(chat, ChatMessages.MessageType.ENTER);
 
     }
 
     @MessageMapping("/chat/message")
     public void sendMsg(ChatMessages message) {
         template.convertAndSend("/sub/chat/room/"+ message.getRoomKey(), message);
+        chatRepository.saveMessages(message, ChatMessages.MessageType.TALK);
     }
 
     @EventListener

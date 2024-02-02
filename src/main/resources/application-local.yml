@@ -10,7 +10,7 @@ spring:
     database-platform: org.hibernate.dialect.MySQL8Dialect
 ---
 jwt:
-  secret_key: 342fdskjhfsdiumnbvxuicvwebvbvjoifjioejoiewjwef@!djsfhdsjkcvoujvkcxnvuvxojoxpvjew9vuw9esfhkjsdaudauida
+  secret_key: 342fdskjhfsdiumnbvxuicvwebvbvjoifjioejoiewjwefdjsfhdsjkcvoujvkcxnvuvxojoxpvjew9vuw9esfhkjsdaud
   access:
     expiration: 3600000000
   refresh:

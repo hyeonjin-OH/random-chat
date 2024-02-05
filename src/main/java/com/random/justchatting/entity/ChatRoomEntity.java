@@ -28,4 +28,7 @@ public class ChatRoomEntity {
     private String senderId;
     private String receiverId;
 
+    private LocalDateTime lastTime;
+    private String lastMessage;
+
 }

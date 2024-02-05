@@ -50,9 +50,23 @@ public class ChatController {
 
     //채팅 홈
     @GetMapping("/chattingroom")
-    public ResponseEntity<?> getChattingRoom(@PathVariable String userId) {
-        List<ChatRoom> rooms = chatService.findAllRoom(userId);
+    public ResponseEntity<?> getChattingRoom(@AuthenticationPrincipal UserDetails user) {
+        String uuId = user.getUsername();
+        List<ChatRoom> rooms = chatService.findAllRoom(uuId);
         return ResponseEntity.ok().body(rooms);
+    }
+
+    @GetMapping("/chattingroom/{roomId}")
+    public ResponseEntity<?> getChattingRoom(@AuthenticationPrincipal UserDetails user, @PathVariable Long roomId) {
+        try{
+            String uuId = user.getUsername();
+            String roomKey = chatService.findRoomKeyByRoomIdAndUuId(roomId, uuId);
+            List<ChatMessages> messages = chatService.findAllMessages(roomKey);
+            return ResponseEntity.ok().body(messages);
+        }catch (Exception e){
+            return ResponseEntity.badRequest().body("본인이 참가한 roomId가 아닙니다.");
+        }
+
     }
 
 

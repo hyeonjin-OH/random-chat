@@ -57,7 +57,7 @@ public class ChatController {
     }
 
     @GetMapping("/chattingroom/{roomId}")
-    public ResponseEntity<?> getChattingRoom(@AuthenticationPrincipal UserDetails user, @PathVariable Long roomId) {
+    public ResponseEntity<?> getChattingRoom(@PathVariable Long roomId, @AuthenticationPrincipal UserDetails user) {
         try{
             String uuId = user.getUsername();
             String roomKey = chatService.findRoomKeyByRoomIdAndUuId(roomId, uuId);

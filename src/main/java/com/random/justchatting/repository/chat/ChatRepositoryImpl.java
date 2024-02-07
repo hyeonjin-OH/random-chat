@@ -23,7 +23,7 @@ public class ChatRepositoryImpl implements ChatRepository{
     @Override
     public List<ChatMessages> getAllMessages(String roomKey) {
         List<ChatMessages> messages = chatJpaRepository.findAllByRoomKey(roomKey)
-                .stream().map(list -> ChatMessages.from(list, ChatMessages.MessageType.ENTER))
+                .stream().map(list -> ChatMessages.from(list, ChatMessages.MessageType.TALK))
                 .collect(Collectors.toList());
         return messages;
     }

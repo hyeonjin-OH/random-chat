@@ -45,6 +45,7 @@ public class MessageController {
     public void sendMsg(ChatMessages message) {
         template.convertAndSend("/sub/chat/room/"+ message.getRoomKey(), message);
         chatRepository.saveMessages(message, ChatMessages.MessageType.TALK);
+        chatRoomRepository.updateLastChat(message.getRoomKey(), message.getSendTime(), message.getMessage());
     }
 
     @EventListener
@@ -66,7 +67,7 @@ public class MessageController {
                 .sender(userUUID)
                 .message("채팅방에서 퇴장하였습니다.")
                 .build();
-        template.convertAndSend("/sub/chat/room/" + roomId, chat);
+        template.convertAndSend("/sub/chat/room/" , chat);
 
     }
 

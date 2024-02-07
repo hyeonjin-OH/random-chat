@@ -61,6 +61,7 @@ public class SecurityConfig {
                         authorizeRequests
                                 .requestMatchers("/", "/register").permitAll()
                                 .requestMatchers("/api/v1/**").permitAll()
+                                .requestMatchers("/chat/**" ).permitAll()
                                 .anyRequest().authenticated()
                 )
                 .exceptionHandling((exceptionConfig) ->

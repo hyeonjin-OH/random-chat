@@ -10,7 +10,7 @@ import java.util.List;
 public interface ChatRoomJpaRepository extends JpaRepository<ChatRoomEntity, Long> {
     ChatRoomEntity findByRoomKey(String roomKey);
 
-    @Query(value="select * from chatroom c where c.room_id = :roomid and (c.received_id = :uuid or c.sender_id = :uuid)",
+    @Query(value="select * from room c where c.room_id = :roomid and (c.receiver_id = :uuid or c.sender_id = :uuid)",
     nativeQuery = true)
     ChatRoomEntity findByRoomIdAndUuId(@Param("roomid")Long roomId, @Param("uuid")String uuId);
 }

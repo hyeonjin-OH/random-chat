@@ -12,4 +12,11 @@ public interface ChatService {
     List<ChatMessages> findAllMessages(String roomKey);
 
     String findRoomKeyByRoomIdAndUuId(Long roomId, String uuId);
+
+
+    ChatRoom openChatRoom(String senderId);
+
+    ChatRoom enterChatRoom(String receiverId, String roomKey);
+
+    ChatRoom exitChatRoom(String roomKey, String uuId);
 }

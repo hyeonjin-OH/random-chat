@@ -11,4 +11,8 @@ public interface ChatRoomRepository {
     ChatRoom findRoomKeyByRoomIdAndUuId(Long roomId, String uuId);
 
     ChatRoom updateLastChat(String roomKey, LocalDateTime time, String message);
+
+    ChatRoom saveRoom(ChatRoom room);
+
 }
+

@@ -1,6 +1,9 @@
 package com.random.justchatting.repository.chat;
 
 import com.random.justchatting.domain.chat.ChatRoom;
+import com.random.justchatting.domain.login.User;
+import com.random.justchatting.exception.User.UserException;
+import com.random.justchatting.repository.user.UserJpaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -11,6 +14,7 @@ import java.time.LocalDateTime;
 public class ChatRoomRepositoryImpl implements ChatRoomRepository{
 
     private final ChatRoomJpaRepository chatRoomJpaRepository;
+    private final UserJpaRepository userJpaRepository;
 
     @Override
     public ChatRoom findByRoomKey(String roomKey) {
@@ -29,4 +33,11 @@ public class ChatRoomRepositoryImpl implements ChatRoomRepository{
 
         return ChatRoom.from(chatRoomJpaRepository.save(ChatRoom.toEntity(room)));
     }
+
+    @Override
+    public ChatRoom saveRoom(ChatRoom room) {
+        return ChatRoom.from(chatRoomJpaRepository.save(ChatRoom.toEntity(room)));
+    }
+
+
 }

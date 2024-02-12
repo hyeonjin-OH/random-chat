@@ -11,6 +11,8 @@ public interface UserRepository {
 
     User findByApiKey(String apiKey);
 
+    User findByUuId(String uuId);
+
     List<ChatRoom> findRoomByUserId(Long userId);
 
 

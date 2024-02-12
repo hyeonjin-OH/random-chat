@@ -19,16 +19,14 @@ public class User {
     private String apiKey;
     private String uuId;
     private String nickName;
-    private String mainCharacter;
     private List<String> rooms;
 
     @Builder
-    public User(Long id, String apiKey, String uuId, String nickName, String mainCharacter, List<String> rooms) {
+    public User(Long id, String apiKey, String uuId, String nickName, List<String> rooms) {
         this.id = id;
         this.apiKey = apiKey;
         this.uuId = uuId;
         this.nickName = nickName;
-        this.mainCharacter = mainCharacter;
         this.rooms = rooms;
     }
 
@@ -38,7 +36,6 @@ public class User {
                 .uuId(user.getApiKey().substring(user.getApiKey().length(), 6)
                         + LocalDateTime.now().format(DateTimeFormatter.ofPattern("hhssmm")))
                 .nickName(user.getNickName())
-                .mainCharacter(user.getMainCharacter())
                 .rooms(user.getRooms())
                 .build();
     }
@@ -49,7 +46,6 @@ public class User {
                 .apiKey(user.apiKey)
                 .uuId(user.uuId)
                 .nickName(user.nickName)
-                .mainCharacter(user.mainCharacter)
                 .rooms(user.rooms)
                 .build();
     }
@@ -60,7 +56,6 @@ public class User {
                 .apiKey(user.getApiKey())
                 .uuId(user.getUuId())
                 .nickName(user.getNickName())
-                .mainCharacter(user.getMainCharacter())
                 .rooms(user.getRooms())
                 .build();
     }

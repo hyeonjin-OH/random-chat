@@ -22,17 +22,15 @@ public class UserEntity {
     private String apiKey;
     private String uuId;
     private String nickName;
-    private String mainCharacter;
     @Convert(converter = StringListConverter.class)
     private List<String> rooms=new ArrayList<>();
 
     @Builder
-    public UserEntity(Long id, String apiKey, String uuId, String nickName, String mainCharacter, List<String> rooms) {
+    public UserEntity(Long id, String apiKey, String uuId, String nickName, List<String> rooms) {
         this.id = id;
         this.apiKey = apiKey;
         this.uuId = uuId;
         this.nickName = nickName;
-        this.mainCharacter = mainCharacter;
         this.rooms = rooms;
     }
 }

@@ -3,6 +3,7 @@ package com.random.justchatting.repository.user;
 import com.random.justchatting.domain.chat.ChatRoom;
 import com.random.justchatting.domain.login.User;
 import com.random.justchatting.entity.UserEntity;
+import com.random.justchatting.exception.User.UserException;
 import com.random.justchatting.repository.chat.ChatRoomRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -33,6 +34,12 @@ public class UserRepositoryImpl implements UserRepository{
             return null;
         }
     }
+
+    @Override
+    public User findByUuId(String uuId) {
+        return User.from(userJpaRepository.findByUuId(uuId).orElseThrow());
+    }
+
 
     @Override
     public List<ChatRoom> findRoomByUserId(Long userId) {

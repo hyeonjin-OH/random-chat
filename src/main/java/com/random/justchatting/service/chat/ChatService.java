@@ -2,6 +2,7 @@ package com.random.justchatting.service.chat;
 
 import com.random.justchatting.domain.chat.ChatMessages;
 import com.random.justchatting.domain.chat.ChatRoom;
+import com.random.justchatting.domain.login.UserPrefer;
 
 import java.util.List;
 
@@ -19,4 +20,6 @@ public interface ChatService {
     ChatRoom enterChatRoom(String receiverId, String roomKey);
 
     ChatRoom exitChatRoom(String roomKey, String uuId);
+
+    ChatRoom matchRoom(String uuId, UserPrefer prefer);
 }

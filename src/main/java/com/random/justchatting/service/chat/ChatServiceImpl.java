@@ -3,6 +3,7 @@ package com.random.justchatting.service.chat;
 import com.random.justchatting.domain.chat.ChatMessages;
 import com.random.justchatting.domain.chat.ChatRoom;
 import com.random.justchatting.domain.login.User;
+import com.random.justchatting.domain.login.UserPrefer;
 import com.random.justchatting.exception.User.UserException;
 import com.random.justchatting.repository.chat.ChatRepository;
 import com.random.justchatting.repository.chat.ChatRoomRepository;
@@ -80,11 +81,18 @@ public class ChatServiceImpl implements ChatService{
             throw new UserException("해당 ID는 해당 방에 존재하는 ID가 아닙니다.");
         }
 
+
         User user = userRepository.findByUuId(uuId);
         user.exitRoom(roomKey);
         userRepository.save(user);
 
         return chatRoomRepository.saveRoom(room);
+    }
+
+    @Override
+    public ChatRoom matchRoom(String uuId, UserPrefer prefer) {
+
+        return null;
     }
 
 }

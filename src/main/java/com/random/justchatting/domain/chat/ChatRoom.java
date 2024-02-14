@@ -31,6 +31,7 @@ public class ChatRoom {
         chatRoom.roomKey = UUID.randomUUID().toString();
         chatRoom.createdTime = LocalDateTime.now();
         chatRoom.lastTime = LocalDateTime.now();
+        chatRoom.lastMessage = "";
         return chatRoom;
     }
 

@@ -25,6 +25,7 @@ public class RedisConfig {
     public RedisConnectionFactory redisConnectionFactory() {
         return new LettuceConnectionFactory(redisHost, redisPort);
     }
+
     @Bean
     public RedisTemplate<String, String> redisTemplate() {
         RedisTemplate<String, String> redisTemplate = new RedisTemplate<>();
@@ -34,18 +35,18 @@ public class RedisConfig {
         return redisTemplate;
     }
 
-    @Bean
-    public ReactiveRedisTemplate<String, String> reactiveRedisTemplate(ReactiveRedisConnectionFactory connectionFactory) {
-        RedisSerializer<String> serializer = new StringRedisSerializer();
-        Jackson2JsonRedisSerializer jackson2JsonRedisSerializer = new Jackson2JsonRedisSerializer<>(String.class);
-        RedisSerializationContext serializationContext = RedisSerializationContext
-                .<String, String>newSerializationContext()
-                .key(serializer)
-                .value(jackson2JsonRedisSerializer)
-                .hashKey(serializer)
-                .hashValue(jackson2JsonRedisSerializer)
-                .build();
-
-        return new ReactiveRedisTemplate<>(connectionFactory, serializationContext);
-    }
+//    @Bean
+//    public ReactiveRedisTemplate<String, String> reactiveRedisTemplate(ReactiveRedisConnectionFactory connectionFactory) {
+//        RedisSerializer<String> serializer = new StringRedisSerializer();
+//        Jackson2JsonRedisSerializer<String> jackson2JsonRedisSerializer = new Jackson2JsonRedisSerializer<>(String.class);
+//        RedisSerializationContext<String, String> serializationContext = RedisSerializationContext
+//                .<String, String>newSerializationContext()
+//                .key(serializer)
+//                .value(jackson2JsonRedisSerializer)
+//                .hashKey(serializer)
+//                .hashValue(jackson2JsonRedisSerializer)
+//                .build();
+//
+//        return new ReactiveRedisTemplate<>(connectionFactory, serializationContext);
+//    }
 }

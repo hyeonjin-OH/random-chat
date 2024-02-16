@@ -7,10 +7,11 @@ public interface RedisService {
 
     ChatRoom addUserOptions(long time, MatchReq req);
 
+    ChatRoom modifyUserOptions(MatchReq req);
+
     String preferMatching(MatchReq req);
 
 
     void cancelMatch(MatchReq req);
-
 
 }

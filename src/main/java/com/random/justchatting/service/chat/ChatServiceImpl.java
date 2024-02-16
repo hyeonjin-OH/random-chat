@@ -81,18 +81,31 @@ public class ChatServiceImpl implements ChatService{
             throw new UserException("해당 ID는 해당 방에 존재하는 ID가 아닙니다.");
         }
 
-
         User user = userRepository.findByUuId(uuId);
         user.exitRoom(roomKey);
         userRepository.save(user);
+
+        // 두 사람 모두 퇴장했다면 대화내용 및 방 삭제
+        ChatRoom reloadRoom =chatRoomRepository.findByRoomKey(roomKey);
+        if(reloadRoom.getSenderId().equals("")
+            && reloadRoom.getReceiverId().equals("")){
+            deleteChatRoom(roomKey);
+        }
 
         return chatRoomRepository.saveRoom(room);
     }
 
     @Override
-    public ChatRoom matchRoom(String uuId, UserPrefer prefer) {
-
-        return null;
+    public ChatRoom findRoomInfo(String roomKey) {
+        return chatRoomRepository.findByRoomKey(roomKey);
     }
+
+    // 채팅 목록 및 방 모두 삭제
+    private void deleteChatRoom(String roomKey) {
+
+        chatRoomRepository.deleteRoom(chatRoomRepository.findByRoomKey(roomKey));
+        chatRepository.deleteAllMessages(roomKey);
+    }
+
 
 }

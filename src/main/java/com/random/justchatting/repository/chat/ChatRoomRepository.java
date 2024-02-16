@@ -14,5 +14,7 @@ public interface ChatRoomRepository {
 
     ChatRoom saveRoom(ChatRoom room);
 
+    void deleteRoom(ChatRoom room);
+
 }
 

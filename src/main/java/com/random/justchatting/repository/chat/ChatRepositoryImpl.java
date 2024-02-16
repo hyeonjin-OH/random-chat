@@ -32,4 +32,9 @@ public class ChatRepositoryImpl implements ChatRepository{
     public ChatRoom findChatRoomByRoomIdAndUuId(Long roomId, String uuId) {
         return null;
     }
+
+    @Override
+    public void deleteAllMessages(String roomKey) {
+        chatJpaRepository.deleteByRoomKey(roomKey);
+    }
 }

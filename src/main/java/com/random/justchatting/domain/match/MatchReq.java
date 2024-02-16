@@ -15,4 +15,5 @@ public class MatchReq {
     private String prefer;
     private int optionCount;
     private String roomKey;
+    private long time;
 }

@@ -3,6 +3,7 @@ package com.random.justchatting.controller.chat;
 import com.amazonaws.Response;
 import com.random.justchatting.domain.chat.ChatMessages;
 import com.random.justchatting.domain.chat.ChatRoom;
+import com.random.justchatting.domain.chat.ChatRoomReq;
 import com.random.justchatting.domain.login.User;
 import com.random.justchatting.domain.login.UserPrefer;
 import com.random.justchatting.service.chat.ChatService;
@@ -62,6 +63,10 @@ public class ChatController {
             String uuId = user.getUsername();
             String roomKey = chatService.findRoomKeyByRoomIdAndUuId(roomId, uuId);
             List<ChatMessages> messages = chatService.findAllMessages(roomKey);
+
+            if(messages == null){
+                return ResponseEntity.badRequest().body("대화방이 존재하지 않습니다.");
+            }
             return ResponseEntity.ok().body(messages);
         }catch (Exception e){
             return ResponseEntity.badRequest().body("본인이 참가한 roomId가 아닙니다.");
@@ -69,16 +74,11 @@ public class ChatController {
 
     }
 
-
-    @GetMapping("/chat/{roomId}")
-    public ResponseEntity<?> getChat(@PathVariable String roomId){
-
-        return ResponseEntity.ok().body("Get TEST : " + roomId);
-    }
-
-    @PostMapping("/chat/{roomId}")
-    public ResponseEntity<?> createChat(@PathVariable String roomId){
-        return ResponseEntity.ok().body("Post TEST : " + roomId);
+    @PostMapping("/chattingroom/exit")
+    public ResponseEntity<?> exitChattingRoom(@AuthenticationPrincipal UserDetails user, @RequestBody ChatRoomReq room) {
+        chatService.exitChatRoom(room.getRoomKey(), room.getUuId());
+        List<ChatRoom> rooms = chatService.findAllRoom(room.getUuId());
+        return ResponseEntity.ok().body(rooms);
 
     }
 

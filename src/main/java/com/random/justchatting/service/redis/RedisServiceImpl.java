@@ -3,6 +3,7 @@ package com.random.justchatting.service.redis;
 import com.random.justchatting.domain.chat.ChatRoom;
 import com.random.justchatting.domain.login.User;
 import com.random.justchatting.domain.match.MatchReq;
+import com.random.justchatting.exception.Chat.MatchException;
 import com.random.justchatting.repository.chat.ChatRoomRepository;
 import com.random.justchatting.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -29,16 +30,29 @@ public class RedisServiceImpl implements RedisService{
     @Transactional
     public ChatRoom addUserOptions(long timeMillis, MatchReq req) {
 
-        redisTemplate.opsForZSet().add(req.getPrefer(),
+        redisTemplate.opsForZSet().add(Integer.toString(req.getOptionCount())+":"+ req.getPrefer(),
                                 req.getUuId(), timeMillis);
 
         ChatRoom room = setRoomInfo(req);
-        redisTemplate.opsForZSet().remove(req.getPrefer(), req.getUuId());
-        redisTemplate.opsForZSet().add(req.getPrefer(),
+        redisTemplate.opsForZSet().remove(Integer.toString(req.getOptionCount())+":"+ req.getPrefer(), req.getUuId());
+        redisTemplate.opsForZSet().add(Integer.toString(req.getOptionCount())+":"+ req.getPrefer(),
                 req.getUuId() + ":" + room.getRoomKey(), timeMillis);
 
         return room;
     }
+
+    @Transactional
+    public ChatRoom modifyUserOptions(MatchReq req) {
+
+        ChatRoom room = chatRoomRepository.findByRoomKey(req.getRoomKey());
+
+        redisTemplate.opsForZSet().remove(Integer.toString(req.getOptionCount()+1)+":"+ req.getPrefer(), req.getUuId()+ ":" + req.getRoomKey());
+        redisTemplate.opsForZSet().add(Integer.toString(req.getOptionCount())+":"+ req.getPrefer(),
+                req.getUuId() + ":" + req.getRoomKey(), req.getTime());
+
+        return room;
+    }
+
 
     // 매칭을 수행하는 메소드
     @Transactional
@@ -48,11 +62,12 @@ public class RedisServiceImpl implements RedisService{
         // 매칭 시, prefer 중 포지션 부분은 서로 반대되는 것 끼리 매칭시켜줘야 함
         // position은 둘 중 하나임.
         String position = req.getPrefer().substring(positionIdx + 1).equals("101") ? "100" : "101";
-        String prefer = req.getPrefer().substring(0, positionIdx) + "-" + position;
+        String prefer = Integer.toString(req.getOptionCount())+":"+ req.getPrefer().substring(0, positionIdx) + "-" + position;
+        int preferCount = req.getPrefer().split(",").length;
 
         Set<String> user = redisTemplate.opsForZSet().reverseRange(prefer, 0, 0);
 
-        // 매칭 prefer과 매칭되는 사용자가 있다면 알고리즘 수행
+        // 매칭 prefer과 매칭되는 사용자가 있다면 방 입장 및 redis 대기열에서 삭제
         if(user !=null && user.size()> 0){
             String matchUser = user.iterator().next();
             // ':'를 기준으로 분리하여 value 가져오기
@@ -69,15 +84,58 @@ public class RedisServiceImpl implements RedisService{
             return roomKey;
         }
         else if(user.size()== 0){
-            return "";
-        }
-        else{
             // 옵션 전체 일치 아닐 시
-            if (req.getOptionCount() != 3){
-                Cursor<ZSetOperations.TypedTuple<String>> cursor = redisTemplate.opsForZSet().scan(prefer, ScanOptions.NONE);
+            if (req.getOptionCount() != preferCount){
+                ScanOptions scanOptions = ScanOptions.scanOptions().match(req.getOptionCount()+":*").build();
+                Cursor<byte[]> keys = redisTemplate.getConnectionFactory().getConnection().scan(scanOptions);
 
-                while (cursor.hasNext()) {
-                    return checkOptions(req, cursor, positionIdx);
+                if (keys.hasNext()) {
+                    return checkOptions2(keys, req, positionIdx);
+                }
+            }
+        }
+        return "";
+    }
+
+    private String checkOptions2(Cursor<byte[]> keys, MatchReq req, int positionIdx) {
+
+        while (keys.hasNext()) {
+            String key = new String(keys.next());
+
+            // 순차적으로 해당 key를 가진 user의 value도 가져오기 위함
+            Set<String> user = redisTemplate.opsForZSet().reverseRange(key, 0, 0);
+            String matchUser = user.iterator().next();
+            // ':'를 기준으로 분리하여 value 가져오기
+            String[] parts = matchUser.split(":");
+            String cmpUuId = "";
+            String cmpRoomKey = "";
+            if (parts.length >= 2) {
+                cmpUuId = parts[0];
+                cmpRoomKey = parts[1];
+            }
+
+            // 본인이라면 패쓰
+            if (cmpUuId.equals(req.getUuId())) {
+                continue;
+            }
+            // 타인이라면 선호 비교
+            else {
+                String[] cmpPrefers = key.substring(key.indexOf(":") + 1, positionIdx + 1).split(",");
+                String[] myPrefers = req.getPrefer().substring(0, positionIdx - 1).split(",");
+
+                List<String> tmpList = new ArrayList<>(Arrays.asList(cmpPrefers));
+
+                int matchCount = 0;
+                for (String p : myPrefers) {
+                    matchCount = tmpList.contains(p) ? matchCount + 1 : matchCount;
+                }
+
+                if (matchCount >= req.getOptionCount()) {
+                    enterRoomInfo(req, cmpUuId, cmpRoomKey);
+                    redisTemplate.opsForZSet().remove(key, matchUser);
+                    redisTemplate.opsForZSet().remove(Integer.toString(req.getOptionCount())+":"+ req.getPrefer(), req.getUuId()+ ":" + req.getRoomKey());
+                    return cmpRoomKey;
+
                 }
             }
         }
@@ -85,12 +143,30 @@ public class RedisServiceImpl implements RedisService{
     }
 
     @Override
+    @Transactional
     public void cancelMatch(MatchReq req) {
+        try{
+            User user = userRepository.findByUuId(req.getUuId());
+            user.exitRoom(req.getRoomKey());
+            userRepository.save(user);
 
-        redisTemplate.opsForZSet().remove(req.getPrefer(), req.getUuId()+"-"+req.getRoomKey());
+            // Redis에서 찾는 중인 경우에는 roomKey가 없을 수도 있기 때문에
+            if(!Objects.equals(req.getRoomKey(), "")){
+                ChatRoom room =  chatRoomRepository.findByRoomKey(req.getRoomKey());
+                chatRoomRepository.deleteRoom(room);
+            }
+
+            redisTemplate.opsForZSet().remove(Integer.toString(req.getOptionCount())+":"+ req.getPrefer(), req.getUuId()+":"+req.getRoomKey());
+        }catch (MatchException e){
+            throw new MatchException("매칭 취소하는 중 에러가 발생하였습니다.");
+        }
+
     }
 
-    // 선호 옵션이 req.getOptionCount만큼 일치한다면 해당 roomKey반환
+
+
+    // 선호 옵션이 req.getOptionCount만큼 일치한다면 입장작업 및 redis대기열 삭제
+    // return: 해당 roomKey반환
     private String checkOptions(MatchReq req, Cursor<ZSetOperations.TypedTuple<String>> cursor, int positionIdx){
         ZSetOperations.TypedTuple<String> tuple = cursor.next();
         String member = tuple.getValue(); // 멤버를 가져옴
@@ -110,6 +186,7 @@ public class RedisServiceImpl implements RedisService{
         }
 
         if(matchCount >= req.getOptionCount()){
+            enterRoomInfo(req, key, value);
             redisTemplate.opsForZSet().remove(key, value);
             return value.split(":")[1];
         }
@@ -134,6 +211,18 @@ public class RedisServiceImpl implements RedisService{
     * roomKey : 매칭 된 roomKey
     */
     private void enterRoomInfo(MatchReq req, String uuId, String roomKey){
+
+        // 기존에 본인이 개설한 방이 있다면
+        if(!req.getRoomKey().equals("")){
+            // 기존 본인 방 삭제
+            chatRoomRepository.deleteRoom(chatRoomRepository.findByRoomKey(req.getRoomKey()));
+            // 본인 정보 업데이트
+            User user = userRepository.findByUuId(req.getUuId());
+            user.exitRoom(req.getRoomKey());
+            userRepository.save(user);
+        }
+
+        // 매칭 대상자 방으로 정보 업데이트
         ChatRoom room = chatRoomRepository.findByRoomKey(roomKey);
         room.setReceiver(req.getUuId());
         chatRoomRepository.saveRoom(room);
@@ -141,6 +230,5 @@ public class RedisServiceImpl implements RedisService{
         user.enterRoom(roomKey);
         userRepository.save(user);
     }
-
 
 }

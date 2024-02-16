@@ -21,5 +21,5 @@ public interface ChatService {
 
     ChatRoom exitChatRoom(String roomKey, String uuId);
 
-    ChatRoom matchRoom(String uuId, UserPrefer prefer);
+    ChatRoom findRoomInfo(String roomKey);
 }

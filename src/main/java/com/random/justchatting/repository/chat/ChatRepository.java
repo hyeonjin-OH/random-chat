@@ -12,4 +12,6 @@ public interface ChatRepository {
     List<ChatMessages> getAllMessages(String roomKey);
 
     ChatRoom findChatRoomByRoomIdAndUuId(Long roomId, String uuId);
+
+    void deleteAllMessages(String roomKey);
 }

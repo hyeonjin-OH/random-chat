@@ -10,4 +10,5 @@ public interface ChatJpaRepository extends JpaRepository<ChatMessagesEntity, Lon
 
     List<ChatMessagesEntity> findAllByRoomKey(String roomKey);
 
+    void deleteByRoomKey(String roomkey);
 }

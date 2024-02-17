@@ -2,9 +2,10 @@ spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/random-chat
-    #url: jdbc:mysql://database-1.ccgjlcxoivyr.ap-northeast-2.rds.amazonaws.com:3306/shopping
+    #url: jdbc:mysql://database-1.ccgjlcxoivyr.ap-northeast-2.rds.amazonaws.com:3306/lochat
     username: root
     password: root123
+    #password: db1!aws1!
 
   jpa:
     database-platform: org.hibernate.dialect.MySQL8Dialect

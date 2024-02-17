@@ -26,6 +26,7 @@ public class ChatMessages {
 
     public static ChatMessagesEntity toEntity(ChatMessages messages){
         return ChatMessagesEntity.builder()
+                .type(messages.getType().toString())
                 .roomKey(messages.getRoomKey())
                 .senderId(messages.sender)
                 .messages(messages.message)
@@ -33,9 +34,9 @@ public class ChatMessages {
                 .build();
     }
 
-    public static ChatMessages from(ChatMessagesEntity messages, MessageType type){
+    public static ChatMessages from(ChatMessagesEntity messages){
         return ChatMessages.builder()
-                .type(type)
+                .type(MessageType.valueOf(messages.getType()))
                 .roomKey(messages.getRoomKey())
                 .sender(messages.getSenderId())
                 .message(messages.getMessages())

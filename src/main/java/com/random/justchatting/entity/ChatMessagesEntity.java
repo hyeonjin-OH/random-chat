@@ -18,6 +18,7 @@ public class ChatMessagesEntity {
     private Long chatId;
     private String roomKey;
     private String senderId;
+    private String type;
     @Column(length=5000)
     private String messages;
     LocalDateTime sendTime;

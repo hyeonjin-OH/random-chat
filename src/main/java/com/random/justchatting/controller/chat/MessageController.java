@@ -40,6 +40,8 @@ public class MessageController {
         chat.setMessage("채팅방에 참여하였습니다.");
         template.convertAndSend("/sub/chat/room/" + chat.getRoomKey(), chat);
         chatRepository.saveMessages(chat, ChatMessages.MessageType.ENTER);
+        chatRoomRepository.updateLastChat(chat.getRoomKey(), chat.getSendTime(), chat.getMessage());
+
 
     }
 
@@ -65,13 +67,10 @@ public class MessageController {
         // 채팅방 삭제(User, ChatRoom)
         chatService.exitChatRoom(chat.getRoomKey(), chat.getSender());
 
-        ChatMessages exitChat = ChatMessages.builder()
-                .type(ChatMessages.MessageType.LEAVE)
-                .sender(chat.getSender())
-                .message("채팅방에서 퇴장하였습니다.")
-                .build();
-        template.convertAndSend("/sub/chat/room/" , exitChat);
-
+        chat.setMessage("채팅방에서 퇴장하였습니다.");
+        template.convertAndSend("/sub/chat/room/" + chat.getRoomKey() , chat);
+        chatRepository.saveMessages(chat, ChatMessages.MessageType.LEAVE);
+        chatRoomRepository.updateLastChat(chat.getRoomKey(), chat.getSendTime(), chat.getMessage());
     }
 
 }

@@ -85,13 +85,6 @@ public class ChatServiceImpl implements ChatService{
         user.exitRoom(roomKey);
         userRepository.save(user);
 
-        // 두 사람 모두 퇴장했다면 대화내용 및 방 삭제
-        ChatRoom reloadRoom =chatRoomRepository.findByRoomKey(roomKey);
-        if(reloadRoom.getSenderId().equals("")
-            && reloadRoom.getReceiverId().equals("")){
-            deleteChatRoom(roomKey);
-        }
-
         return chatRoomRepository.saveRoom(room);
     }
 
@@ -101,10 +94,14 @@ public class ChatServiceImpl implements ChatService{
     }
 
     // 채팅 목록 및 방 모두 삭제
-    private void deleteChatRoom(String roomKey) {
+    public void deleteChatRoom(String roomKey) {
 
-        chatRoomRepository.deleteRoom(chatRoomRepository.findByRoomKey(roomKey));
-        chatRepository.deleteAllMessages(roomKey);
+        // 두 사람 모두 퇴장했다면 대화내용 및 방 삭제
+        ChatRoom reloadRoom =chatRoomRepository.findByRoomKey(roomKey);
+        if(reloadRoom.getSenderId().equals("") && reloadRoom.getReceiverId().equals("")) {
+            chatRoomRepository.deleteRoom(chatRoomRepository.findByRoomKey(roomKey));
+            chatRepository.deleteAllMessages(roomKey);
+        }
     }
 
 

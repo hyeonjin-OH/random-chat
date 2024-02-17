@@ -163,38 +163,6 @@ public class RedisServiceImpl implements RedisService{
 
     }
 
-
-
-    // 선호 옵션이 req.getOptionCount만큼 일치한다면 입장작업 및 redis대기열 삭제
-    // return: 해당 roomKey반환
-    private String checkOptions(MatchReq req, Cursor<ZSetOperations.TypedTuple<String>> cursor, int positionIdx){
-        ZSetOperations.TypedTuple<String> tuple = cursor.next();
-        String member = tuple.getValue(); // 멤버를 가져옴
-
-        // 멤버에서 키 값을 추출
-        String[] parts = member.split(":"); // ":"를 기준으로 멤버를 분해
-        String key = parts[0]; // 분해된 멤버의 첫 번째 부분이 키 값
-        String value = parts[1];
-
-        String[] raidPrefers = req.getPrefer().substring(0, positionIdx-1).split(",");
-        String[] cmpPrefers = key.split(",");
-        List<String> tmpList = new ArrayList<>(Arrays.asList(cmpPrefers));
-
-        int matchCount = 0;
-        for(String p : raidPrefers){
-            matchCount = tmpList.contains(p) ? matchCount +1 : matchCount;
-        }
-
-        if(matchCount >= req.getOptionCount()){
-            enterRoomInfo(req, key, value);
-            redisTemplate.opsForZSet().remove(key, value);
-            return value.split(":")[1];
-        }
-
-        return "";
-    }
-
-
     private ChatRoom setRoomInfo(MatchReq req){
         User user = userRepository.findByUuId(req.getUuId());
         ChatRoom room = ChatRoom.create();

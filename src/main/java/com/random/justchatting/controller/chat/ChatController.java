@@ -77,6 +77,8 @@ public class ChatController {
     @PostMapping("/chattingroom/exit")
     public ResponseEntity<?> exitChattingRoom(@AuthenticationPrincipal UserDetails user, @RequestBody ChatRoomReq room) {
         chatService.exitChatRoom(room.getRoomKey(), room.getUuId());
+        chatService.deleteChatRoom(room.getRoomKey());
+
         List<ChatRoom> rooms = chatService.findAllRoom(room.getUuId());
         return ResponseEntity.ok().body(rooms);
 

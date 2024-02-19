@@ -53,7 +53,17 @@ public class MessageController {
     }
 
     @MessageMapping("/chat/exit")
-    public void webSocketDisconnectListener(ChatMessages chat, SessionDisconnectEvent event) {
+    public void exitUser(ChatMessages chat) {
+        if(chatRoomRepository.findByRoomKey(chat.getRoomKey()) == null)
+            chatService.deleteChatRoom(chat.getRoomKey());
+        chat.setMessage("채팅방에서 퇴장하였습니다.");
+        template.convertAndSend("/sub/chat/room/" + chat.getRoomKey() , chat);
+        chatRepository.saveMessages(chat, ChatMessages.MessageType.LEAVE);
+        chatRoomRepository.updateLastChat(chat.getRoomKey(), chat.getSendTime(), chat.getMessage());
+    }
+
+    @EventListener
+    public void webSocketDisconnectListener(SessionDisconnectEvent event) {
         log.info("DisConnEvent {}", event);
 
         StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
@@ -63,14 +73,6 @@ public class MessageController {
         String roomKey = (String) headerAccessor.getSessionAttributes().get("roomId");
 
         log.info("headAccessor {}", headerAccessor);
-
-        // 채팅방 삭제(User, ChatRoom)
-        chatService.exitChatRoom(chat.getRoomKey(), chat.getSender());
-
-        chat.setMessage("채팅방에서 퇴장하였습니다.");
-        template.convertAndSend("/sub/chat/room/" + chat.getRoomKey() , chat);
-        chatRepository.saveMessages(chat, ChatMessages.MessageType.LEAVE);
-        chatRoomRepository.updateLastChat(chat.getRoomKey(), chat.getSendTime(), chat.getMessage());
     }
 
-}
+    }

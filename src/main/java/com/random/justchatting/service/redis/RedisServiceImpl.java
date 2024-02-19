@@ -7,11 +7,9 @@ import com.random.justchatting.exception.Chat.MatchException;
 import com.random.justchatting.repository.chat.ChatRoomRepository;
 import com.random.justchatting.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.redis.connection.zset.Tuple;
 import org.springframework.data.redis.core.Cursor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ScanOptions;
-import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,14 +27,9 @@ public class RedisServiceImpl implements RedisService{
 
     @Transactional
     public ChatRoom addUserOptions(long timeMillis, MatchReq req) {
-
-        redisTemplate.opsForZSet().add(Integer.toString(req.getOptionCount())+":"+ req.getPrefer(),
-                                req.getUuId(), timeMillis);
-
         ChatRoom room = setRoomInfo(req);
-        redisTemplate.opsForZSet().remove(Integer.toString(req.getOptionCount())+":"+ req.getPrefer(), req.getUuId());
         redisTemplate.opsForZSet().add(Integer.toString(req.getOptionCount())+":"+ req.getPrefer(),
-                req.getUuId() + ":" + room.getRoomKey(), timeMillis);
+                                req.getUuId()+ ":" + room.getRoomKey(), timeMillis);
 
         return room;
     }
@@ -65,7 +58,7 @@ public class RedisServiceImpl implements RedisService{
         String prefer = Integer.toString(req.getOptionCount())+":"+ req.getPrefer().substring(0, positionIdx) + "-" + position;
         int preferCount = req.getPrefer().split(",").length;
 
-        Set<String> user = redisTemplate.opsForZSet().reverseRange(prefer, 0, 0);
+        Set<String> user = redisTemplate.opsForZSet().range(prefer, 0, 0);
 
         // 매칭 prefer과 매칭되는 사용자가 있다면 방 입장 및 redis 대기열에서 삭제
         if(user !=null && user.size()> 0){
@@ -84,20 +77,19 @@ public class RedisServiceImpl implements RedisService{
             return roomKey;
         }
         else if(user.size()== 0){
-            // 옵션 전체 일치 아닐 시
-            if (req.getOptionCount() != preferCount){
-                ScanOptions scanOptions = ScanOptions.scanOptions().match(req.getOptionCount()+":*").build();
-                Cursor<byte[]> keys = redisTemplate.getConnectionFactory().getConnection().scan(scanOptions);
+            // 옵션 전체 일치 아닐 시 옵션개수 기준으로 비교
+            ScanOptions scanOptions = ScanOptions.scanOptions().match(req.getOptionCount()+":*").build();
+            Cursor<byte[]> keys = redisTemplate.getConnectionFactory().getConnection().scan(scanOptions);
 
-                if (keys.hasNext()) {
-                    return checkOptions2(keys, req, positionIdx);
-                }
+            if (keys.hasNext()) {
+                return checkOptions2(keys, req);
             }
+
         }
         return "";
     }
 
-    private String checkOptions2(Cursor<byte[]> keys, MatchReq req, int positionIdx) {
+    private String checkOptions2(Cursor<byte[]> keys, MatchReq req) {
 
         while (keys.hasNext()) {
             String key = new String(keys.next());
@@ -120,8 +112,10 @@ public class RedisServiceImpl implements RedisService{
             }
             // 타인이라면 선호 비교
             else {
-                String[] cmpPrefers = key.substring(key.indexOf(":") + 1, positionIdx + 1).split(",");
-                String[] myPrefers = req.getPrefer().substring(0, positionIdx - 1).split(",");
+                int cmpPositionIdx = key.indexOf("-");
+                String[] cmpPrefers = key.substring(key.indexOf(":") + 1, cmpPositionIdx).split(",");
+                int myPositionIdx = req.getPrefer().indexOf("-");
+                String[] myPrefers = req.getPrefer().substring(0, myPositionIdx).split(",");
 
                 List<String> tmpList = new ArrayList<>(Arrays.asList(cmpPrefers));
 

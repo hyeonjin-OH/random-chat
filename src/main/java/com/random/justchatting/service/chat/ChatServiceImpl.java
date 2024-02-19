@@ -3,7 +3,6 @@ package com.random.justchatting.service.chat;
 import com.random.justchatting.domain.chat.ChatMessages;
 import com.random.justchatting.domain.chat.ChatRoom;
 import com.random.justchatting.domain.login.User;
-import com.random.justchatting.domain.login.UserPrefer;
 import com.random.justchatting.exception.User.UserException;
 import com.random.justchatting.repository.chat.ChatRepository;
 import com.random.justchatting.repository.chat.ChatRoomRepository;
@@ -90,10 +89,13 @@ public class ChatServiceImpl implements ChatService{
 
     @Override
     public ChatRoom findRoomInfo(String roomKey) {
-        return chatRoomRepository.findByRoomKey(roomKey);
+        ChatRoom room = null;
+        room = chatRoomRepository.findByRoomKey(roomKey);
+        return room;
     }
 
     // 채팅 목록 및 방 모두 삭제
+    @Transactional
     public void deleteChatRoom(String roomKey) {
 
         // 두 사람 모두 퇴장했다면 대화내용 및 방 삭제

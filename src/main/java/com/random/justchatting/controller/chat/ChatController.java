@@ -62,6 +62,21 @@ public class ChatController {
         try{
             String uuId = user.getUsername();
             String roomKey = chatService.findRoomKeyByRoomIdAndUuId(roomId, uuId);
+            ChatRoom room = chatService.findRoomInfo(roomKey);
+
+            return ResponseEntity.ok().body(room);
+        }catch (Exception e){
+            return ResponseEntity.badRequest().body("존재하는 정보가 아닙니다.");
+        }
+
+    }
+
+    //채팅방 메세지
+    @GetMapping("/chattingroom/messages/{roomId}")
+    public ResponseEntity<?> getChattingRoomMessages(@PathVariable Long roomId, @AuthenticationPrincipal UserDetails user) {
+        try{
+            String uuId = user.getUsername();
+            String roomKey = chatService.findRoomKeyByRoomIdAndUuId(roomId, uuId);
             List<ChatMessages> messages = chatService.findAllMessages(roomKey);
 
             if(messages == null){

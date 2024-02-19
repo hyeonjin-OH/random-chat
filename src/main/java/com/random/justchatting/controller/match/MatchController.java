@@ -8,7 +8,6 @@ import com.random.justchatting.service.redis.RedisService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -36,27 +35,34 @@ public class MatchController {
      */
     @PostMapping("/match")
     public ResponseEntity<?> matchingChat(@AuthenticationPrincipal UserDetails user, @RequestBody MatchReq req){
-        long timeMillis = System.currentTimeMillis();
-        HashMap<String, String> response = new HashMap<>();
+        try{
+            long timeMillis = System.currentTimeMillis();
+            HashMap<String, String> response = new HashMap<>();
 
-        String uuId = user.getUsername();
-        ChatRoom room = new ChatRoom();
-        String matchKey = redisService.preferMatching(req);
-        // 매칭
-        if(matchKey.equals("")){
-            // 매칭에 만족하는 값이 없다면 대기리스트에 추가
-            room = redisService.addUserOptions(timeMillis, req);
+            String uuId = user.getUsername();
+            ChatRoom room = new ChatRoom();
+            String matchKey = redisService.preferMatching(req);
+            // 매칭
+            if(matchKey.equals("")){
+                // 매칭에 만족하는 값이 없다면 대기리스트에 추가
+                room = redisService.addUserOptions(timeMillis, req);
+            }
+            else{
+                room = chatService.findRoomInfo(matchKey);
+                template.convertAndSend("/sub/match/" + matchKey, room);
+                return ResponseEntity.ok().body(room);
+            }
+
+            response.put("roomKey", room.getRoomKey());
+            response.put("time", String.valueOf(timeMillis));
+
+            return ResponseEntity.accepted().body(response);
+        }catch (Exception e)
+        {
+            return ResponseEntity.badRequest().body("매칭에 실패하였습니다.");
+
         }
-        else{
-            room = chatService.findRoomInfo(matchKey);
-            template.convertAndSend("/sub/match/" + matchKey, room);
-            return ResponseEntity.ok().body(room);
-        }
 
-        response.put("roomKey", room.getRoomKey());
-        response.put("time", String.valueOf(timeMillis));
-
-        return ResponseEntity.accepted().body(response);
     }
 
     @PostMapping("/match/cancel")

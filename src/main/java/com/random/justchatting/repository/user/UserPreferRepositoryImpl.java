@@ -26,4 +26,15 @@ public class UserPreferRepositoryImpl implements UserPreferRepository{
             return null;
         }
     }
+
+    @Override
+    public UserPrefer findByUId(String uId) {
+        UserPreferEntity prefer = userPreferJpaRepository.findByUuId(uId);
+        if(prefer != null){
+            return UserPrefer.from(prefer);
+        }
+        else{
+            return null;
+        }
+    }
 }

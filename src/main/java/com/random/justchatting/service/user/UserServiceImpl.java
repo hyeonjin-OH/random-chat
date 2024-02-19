@@ -17,10 +17,17 @@ public class UserServiceImpl implements UserService{
         return userPreferRepository.findByUserId(userId);
     }
 
+
+    @Override
+    public UserPrefer getUserPreferenceByUId(String uId) {
+
+        return userPreferRepository.findByUId(uId);
+    }
+
     @Override
     public UserPrefer setUserPreference(UserPrefer prefer) {
-        UserPrefer updatedPrefer = new UserPrefer(prefer.getId(),prefer.getUserId(), prefer.getPreferRaid(), prefer.getPreferRole(), prefer.getPreferTime());
-        UserPrefer savedPrefer = userPreferRepository.findByUserId(prefer.getUserId());
+        UserPrefer updatedPrefer = new UserPrefer(prefer.getId(),prefer.getUserId(), prefer.getUuId(), prefer.getPreferRaid(), prefer.getPreferRole(), prefer.getPreferTime());
+        UserPrefer savedPrefer = userPreferRepository.findByUId(prefer.getUuId());
 
         if(savedPrefer != null) {
             updatedPrefer = savedPrefer.update(prefer);

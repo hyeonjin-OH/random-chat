@@ -12,17 +12,17 @@ public class LoginServiceImpl {
 
     private final UserRepository userRepository;
 
-    public Long saveApiKey(User user){
+
+    public User register(User user){
 
         User findUser = userRepository.findByApiKey(user.getApiKey());
 
         if (findUser != null){
-            return findUser.getId();
+            return findUser;
         }
         else{
-            User newUser = userRepository.save(user);
-            return newUser.getId();
+            User newUser = User.createUId(user);
+            return userRepository.save(newUser);
         }
     }
-
 }

@@ -1,10 +1,14 @@
 package com.random.justchatting.entity;
 
+import com.random.justchatting.config.StringListConverter;
 import com.random.justchatting.domain.login.User;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity(name="Users")
 @Getter
@@ -16,14 +20,17 @@ public class UserEntity {
     private Long id;
     @Column(length=1000)
     private String apiKey;
+    private String uuId;
     private String nickName;
-    private String mainCharacter;
+    @Convert(converter = StringListConverter.class)
+    private List<String> rooms=new ArrayList<>();
 
     @Builder
-    public UserEntity(Long id, String apiKey, String nickName, String mainCharacter) {
+    public UserEntity(Long id, String apiKey, String uuId, String nickName, List<String> rooms) {
         this.id = id;
         this.apiKey = apiKey;
+        this.uuId = uuId;
         this.nickName = nickName;
-        this.mainCharacter = mainCharacter;
+        this.rooms = rooms;
     }
 }

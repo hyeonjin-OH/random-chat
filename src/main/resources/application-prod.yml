@@ -1,12 +1,16 @@
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    #url: jdbc:mysql://database-1.ccgjlcxoivyr.ap-northeast-2.rds.amazonaws.com:3306/shopping
     url: ${rds_mysql_url}
     username: ${rds_mysql_name}
     password: ${rds_mysql_secret}
   session:
     store-type: redis
+  jpa:
+    database-platform: org.hibernate.dialect.MySQL8Dialect
+  redis:
+    host: ${redis_url}
+    port: 6379
 ---
 jwt:
   secret_key: ${jwt_secret}

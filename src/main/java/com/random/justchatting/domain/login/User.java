@@ -60,6 +60,10 @@ public class User {
                 .build();
     }
 
+    public void encodeApiKey(String encodedApiKey){
+        this.apiKey = encodedApiKey;
+    }
+
     public void enterRoom(String roomKey){
         this.rooms.add(roomKey);
     }

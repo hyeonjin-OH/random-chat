@@ -19,11 +19,11 @@ spring:
       matching-strategy: ant_path_matcher
 
   jpa:
-    # JPA Open EntityManager in View 패턴을 활성화 또는 비활성화
+    # JPA Open EntityManager in View 패턴을 활성화 또는 비활성화경
     open-in-view: true
     hibernate:
       # Hibernate가 데이터베이스 스키마를 자동으로 생성 또는 갱신할 때 사용
-      ddl-auto: create
+      ddl-auto: update
     properties:
       hibernate:
         # SQL 쿼리를 보기 쉽게 형식화할지 여부를 지정

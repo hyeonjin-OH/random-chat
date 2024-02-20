@@ -42,7 +42,7 @@ public class User {
     }
 
     public static UserEntity toEntity(User user){
-        return UserEntity.builder()장
+        return UserEntity.builder()
                 .id(user.id)
                 .apiKey(user.apiKey)
                 .uuId(user.uuId)

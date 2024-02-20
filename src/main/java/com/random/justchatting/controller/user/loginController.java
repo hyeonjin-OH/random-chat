@@ -38,6 +38,7 @@ public class loginController {
     public ResponseEntity<?> registerLostArk(@RequestBody User user, HttpSession session){
         try{
             User savedUser = LoginServiceImpl.register(user);
+
             Authentication authentication = new UsernamePasswordAuthenticationToken(savedUser.getUuId(), savedUser.getApiKey());
             List<GrantedAuthority> authoritiesForUser = new ArrayList<>();
             String accessToken = jwtProvider.createAccessToken(savedUser.getUuId(),authoritiesForUser);
@@ -93,5 +94,10 @@ public class loginController {
         String newAccessToken = jwtProvider.createAccessToken(uuId, authorities);
 
         return ResponseEntity.ok().body(newAccessToken);
+    }
+
+    @GetMapping("/test")
+    public ResponseEntity<?> checkConnect(){
+        return ResponseEntity.ok().body("CONNECTED");
     }
 }

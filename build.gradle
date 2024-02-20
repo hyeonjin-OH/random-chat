@@ -55,6 +55,11 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
 
+jar {
+	// ~~plain.jar파일은 생성되지 않게
+	enabled = false
+}
+
 tasks.named('test') {
 	useJUnitPlatform()
 }

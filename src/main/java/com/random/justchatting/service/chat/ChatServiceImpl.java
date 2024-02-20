@@ -27,7 +27,12 @@ public class ChatServiceImpl implements ChatService{
 
     public List<ChatRoom> findAllRoom(String uId){
 
-        return userRepository.findRoomByUuId(uId);
+        try{
+            return userRepository.findRoomByUuId(uId);
+        }catch (NullPointerException e){
+            return null;
+        }
+
     }
 
     public List<ChatMessages> findAllMessages(String roomKey){

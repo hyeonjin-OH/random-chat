@@ -1,6 +1,5 @@
 package com.random.justchatting.config;
 
-import com.random.justchatting.handler.LoginCheckInterceptor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.CacheControl;
@@ -28,13 +27,4 @@ public class WebConfig implements WebMvcConfigurer {
                 .allowCredentials(true)
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS");
     }
-
-//    @Override
-//    public void addInterceptors(InterceptorRegistry registry) {
-//        registry.addInterceptor(new LoginCheckInterceptor())
-//                .order(2)
-//                .addPathPatterns("/**")
-//                .excludePathPatterns("/register","/css/**", "/images/**", "/*.ico", "/error","/js/**","/favicon.ico");
-//
-//    }
 }

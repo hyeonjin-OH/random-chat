@@ -31,17 +31,18 @@ public class User {
     }
 
     public static User createUId(User user){
+        String now = LocalDateTime.now().format(DateTimeFormatter.ofPattern("hhmmss"));
         return User.builder()
                 .apiKey(user.getApiKey())
-                .uuId(user.getApiKey().substring(user.getApiKey().length(), 6)
-                        + LocalDateTime.now().format(DateTimeFormatter.ofPattern("hhssmm")))
-                .nickName(user.getNickName())
+                .uuId(now.substring(0,4) + user.getApiKey().substring(user.getApiKey().length()-6, user.getApiKey().length())
+                        + now.substring(4,6))
+                .nickName("")
                 .rooms(user.getRooms())
                 .build();
     }
 
     public static UserEntity toEntity(User user){
-        return UserEntity.builder()
+        return UserEntity.builder()장
                 .id(user.id)
                 .apiKey(user.apiKey)
                 .uuId(user.uuId)

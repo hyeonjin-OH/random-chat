@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.HashMap;
+import java.util.List;
 
 @Slf4j
 @Controller
@@ -40,6 +41,12 @@ public class MatchController {
             HashMap<String, String> response = new HashMap<>();
 
             String uuId = user.getUsername();
+
+            List<ChatRoom> rooms = chatService.findAllRoom(uuId);
+            if(rooms != null && rooms.size() == 4){
+                return ResponseEntity.badRequest().body("채팅방은 최대 4개까지만 개설이 가능합니다.\n기존 방을 정리한 후 매칭하시기 바랍니다.");
+            }
+
             ChatRoom room = new ChatRoom();
             String matchKey = redisService.preferMatching(req);
             // 매칭
@@ -60,7 +67,6 @@ public class MatchController {
         }catch (Exception e)
         {
             return ResponseEntity.badRequest().body("매칭에 실패하였습니다.");
-
         }
 
     }
@@ -77,23 +83,27 @@ public class MatchController {
 
     @PostMapping("/rematch")
     public ResponseEntity<?> rematchingChat(@AuthenticationPrincipal UserDetails user, @RequestBody MatchReq req){
+        try{
+            String uuId = user.getUsername();
+            HashMap<String, String> response = new HashMap<>();
+            ChatRoom room = redisService.modifyUserOptions(req);
+            String matchKey = redisService.preferMatching(req);
 
-        String uuId = user.getUsername();
-        HashMap<String, String> response = new HashMap<>();
-        ChatRoom room = redisService.modifyUserOptions(req);
-        String matchKey = redisService.preferMatching(req);
+            // 매칭 대기
+            if(matchKey.equals("")){
+                response.put("roomKey", room.getRoomKey());
+                response.put("time", String.valueOf(req.getTime()));
 
-        // 매칭 대기
-        if(matchKey.equals("")){
-            response.put("roomKey", room.getRoomKey());
-            response.put("time", String.valueOf(req.getTime()));
-
-            return ResponseEntity.accepted().body(response);
+                return ResponseEntity.accepted().body(response);
+            }
+            else{
+                room = chatService.findRoomInfo(matchKey);
+                template.convertAndSend("/sub/match/" + matchKey, room);
+                return ResponseEntity.ok().body(room);
+            }
+        }catch (Exception e){
+            return ResponseEntity.badRequest().body("재매칭에 실패하였습니다.");
         }
-        else{
-            room = chatService.findRoomInfo(matchKey);
-            template.convertAndSend("/sub/match/" + matchKey, room);
-            return ResponseEntity.ok().body(room);
-        }
+
     }
 }

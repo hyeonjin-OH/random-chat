@@ -1,5 +1,6 @@
 package com.random.justchatting.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.random.justchatting.auth.JwtAccessDeniedHandler;
 import com.random.justchatting.auth.JwtAuthenticationEntryPoint;
 import com.random.justchatting.auth.JwtAuthenticationFilter;
@@ -79,8 +80,7 @@ public class SecurityConfig {
                                 .anyRequest().authenticated()
                 )
                 .exceptionHandling((exceptionConfig) ->
-                        exceptionConfig.authenticationEntryPoint(new JwtAuthenticationEntryPoint())
-                                .accessDeniedHandler(new JwtAccessDeniedHandler())
+                        exceptionConfig.authenticationEntryPoint(new JwtAuthenticationEntryPoint(new ObjectMapper()))
                 )
                 .formLogin((formLogin) ->
                         formLogin.disable()

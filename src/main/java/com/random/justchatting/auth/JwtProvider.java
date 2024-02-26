@@ -1,10 +1,13 @@
 package com.random.justchatting.auth;
 
+import com.random.justchatting.exception.User.JwtException;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.messaging.support.ErrorMessage;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -12,6 +15,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
+
 import java.security.Key;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -28,6 +33,8 @@ public class JwtProvider {
     private long refreshTokenTime;
 
     private Key key;
+
+    public static final String HEADER_AUTHORIZATION = "Authorization";
 
     public JwtProvider(
             @Value("${jwt.secret_key}") String secret_key
@@ -74,18 +81,13 @@ public class JwtProvider {
     }
 
 
-    // accessToken 만료시 refreshToken으로 accessToken 발급
-    public String createAccessToken(String uuId, List<GrantedAuthority> authorities) {
+    public String createAccessToken(String uuId) {
         Long now = (new Date()).getTime();
         Date now2 = new Date();
         Date accessTokenExpire = new Date(now + this.accessTokenTime);
 
-        log.info("authorities : " + authorities);
 
         Map<String, Object> claims = new HashMap<>();
-        claims.put(AUTHORITIES_KEY, authorities.stream()
-                .map(GrantedAuthority::getAuthority)
-                .collect(Collectors.toList()));
         // setSubject이다.
         // 클레임에 subject를 넣는것
         claims.put("sub", uuId);
@@ -99,13 +101,25 @@ public class JwtProvider {
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
 
-        log.info("accessToken in JwtProvider : " + accessToken);
-
-        // claims subject 확인 in JwtProvider : zxzz45@naver.com
-        log.info("claims subject 확인 in JwtProvider : " + checkToken(accessToken));
-
         return accessToken;
     }
+
+
+    public String reissueAccessToken(String refreshToken){
+        ErrorCode errorCode = validateToken(refreshToken);
+        if(errorCode == null){
+            Authentication user = getAuthentication(refreshToken);
+            return createAccessToken(user.getName());
+        }
+        else{
+            if(errorCode == ErrorCode.TOKEN_EXPIRED){
+                throw new JwtException("RefreshToken EXPIRED");
+            }
+            throw new JwtException("RefreshToken이 유효하지 않습니다.");
+        }
+
+    }
+
 
     // JWT 토큰을 복호화하여 토큰에 들어있는 정보를 꺼내는 코드
     // 토큰으로 클레임을 만들고 이를 이용해 유저 객체를 만들어서 최종적으로 authentication 객체를 리턴
@@ -117,14 +131,16 @@ public class JwtProvider {
         if(claims.get("auth") == null) {
             log.info("권한 정보가 없는 토큰입니다.");
         }
-        // 권한 정보 가져오기
-        List<String> authority = (List<String>) claims.get(AUTHORITIES_KEY);
-        log.info("authority : " + authority);
+        Collection<? extends GrantedAuthority> authorities = new ArrayList<>();
 
-        Collection<? extends GrantedAuthority> authorities =
-                authority.stream()
-                        .map(SimpleGrantedAuthority::new)
-                        .collect(Collectors.toList());
+        // 권한 정보 가져오기
+//        List<String> authority = (List<String>) claims.get(AUTHORITIES_KEY);
+//        log.info("authority : " + authority);
+//
+//        Collection<? extends GrantedAuthority> authorities =
+//                authority.stream()
+//                        .map(SimpleGrantedAuthority::new)
+//                        .collect(Collectors.toList());
 
         UserDetails userDetails = new User(claims.getSubject(), "", authorities);
         log.info("subject : " + claims.getSubject());
@@ -143,15 +159,11 @@ public class JwtProvider {
                     .parseClaimsJws(token)
                     .getBody();
         } catch (ExpiredJwtException e) {
-            log.info("ExpiredJwtException : " + e.getMessage());
-            log.info("ExpiredJwtException : " + e.getClaims());
+
             return e.getClaims();
         }
     }
 
-    // 토큰을 만들 때 제대로 만들어졌는지 log를 찍어보려고할 때
-    // 토큰을 만들 때마다 치면 가독성이 떨어지니
-    // 메소드로 만들어줍니다.
     private String checkToken(String token) {
         Claims claims = Jwts.parserBuilder()
                 .setSigningKey(key)
@@ -163,24 +175,43 @@ public class JwtProvider {
         return subject;
     }
 
+    // 토큰을 가져오기 위한 메소드
+    // Authorization로 정의된 헤더 이름을 사용하여 토큰을 찾고
+    // 토큰이 "Bearer "로 시작하거나 "Bearer "로 안온 것도 토큰 반환
+    public String resolveToken(HttpServletRequest httpServletRequest) {
+        String token = httpServletRequest.getHeader(HEADER_AUTHORIZATION);
+
+        // 토큰이 포함하거나 Bearer 로 시작하면 true
+        if(StringUtils.hasText(token) && token.startsWith("Bearer ")) {
+            return token.substring(7);
+        } else if(StringUtils.hasText(token)) {
+            return token;
+        } else {
+            return null;
+        }
+    }
+
     // 토큰 검증을 위해 사용
-    public boolean validateToken(String token) {
+    public ErrorCode validateToken(String token) {
         try {
             Jwts.parserBuilder()
                     .setSigningKey(key)
                     .build()
                     .parseClaimsJws(token);
-            return true;
+            return null;
         } catch (SecurityException | MalformedJwtException e) {
             log.error("잘못된 JWT 설명입니다. \n info : " + e.getMessage());
+            return ErrorCode.INVALID_INPUT_VALUE;
         } catch (ExpiredJwtException e) {
             log.error("만료된 JWT입니다. \n info : " + e.getMessage());
+            return ErrorCode.TOKEN_EXPIRED;
         } catch (UnsupportedJwtException e) {
             log.error("지원되지 않는 JWT입니다. \n info : " + e.getMessage());
+            return ErrorCode.FAIL_AUTHENTICATION;
         } catch (IllegalArgumentException e) {
             log.error("JWT가 잘못되었습니다. \n info : " + e.getMessage());
+            return ErrorCode.FAIL_AUTHENTICATION;
         }
-        return false;
     }
 
 }

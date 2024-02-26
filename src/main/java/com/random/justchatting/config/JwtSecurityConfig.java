@@ -20,7 +20,6 @@ public class JwtSecurityConfig extends
 
     @Override
     public void configure(HttpSecurity builder) throws Exception {
-        // JwtAuthenticationFilter가 일반 로그인에 대한 토큰 검증을 처리
         JwtAuthenticationFilter customFilter = new JwtAuthenticationFilter(jwtProvider);
         builder.addFilterBefore(customFilter, UsernamePasswordAuthenticationFilter.class);
     }

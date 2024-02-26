@@ -7,24 +7,24 @@ import org.springframework.web.servlet.config.annotation.*;
 
 import java.util.concurrent.TimeUnit;
 
-@Configuration
-@EnableWebMvc
+//@Configuration
+//@EnableWebMvc
 @RequiredArgsConstructor
 public class WebConfig implements WebMvcConfigurer {
 
-    @Override
-    public void addResourceHandlers(final ResourceHandlerRegistry registry){
-        registry.addResourceHandler("/**")
-                .addResourceLocations("classpath:/templates/", "classpath:/static/")
-                .setCacheControl(CacheControl.maxAge(10, TimeUnit.MINUTES));
-    }
-
-    @Override
-    public void addCorsMappings(CorsRegistry registry) {
-        registry.addMapping("/**")
-                .allowedOrigins("http://localhost:3000", "*:3000")
-                .allowedHeaders("Authorization", "Content-Type")
-                .allowCredentials(true)
-                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS");
-    }
+//    @Override
+//    public void addResourceHandlers(final ResourceHandlerRegistry registry){
+//        registry.addResourceHandler("/**")
+//                .addResourceLocations("classpath:/templates/", "classpath:/static/")
+//                .setCacheControl(CacheControl.maxAge(10, TimeUnit.MINUTES));
+//    }
+//
+//    @Override
+//    public void addCorsMappings(CorsRegistry registry) {
+//        registry.addMapping("/**")
+//                .allowedOrigins("http://localhost:3000", "*:3000")
+//                .allowedHeaders("Authorization", "Content-Type")
+//                .allowCredentials(true)
+//                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS");
+//    }
 }

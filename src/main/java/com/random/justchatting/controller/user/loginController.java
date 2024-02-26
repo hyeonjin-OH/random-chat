@@ -1,15 +1,20 @@
 package com.random.justchatting.controller.user;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.random.justchatting.Session.SessionConst;
 import com.random.justchatting.auth.JwtProvider;
 import com.random.justchatting.domain.login.User;
 import com.random.justchatting.domain.login.UserPrefer;
+import com.random.justchatting.exception.User.JwtException;
 import com.random.justchatting.service.user.UserService;
 import com.random.justchatting.service.user.LoginServiceImpl;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -24,6 +29,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 
 @Controller
 @RequiredArgsConstructor
@@ -33,20 +39,34 @@ public class loginController {
     private final LoginServiceImpl LoginServiceImpl;
     private final UserService userService;
     private final JwtProvider jwtProvider;
+    private final ObjectMapper objectMapper;
 
     @PostMapping("/register")
-    public ResponseEntity<?> registerLostArk(@RequestBody User user, HttpSession session){
+    public ResponseEntity<?> registerLostArk(@RequestBody User user, HttpSession session, HttpServletResponse response){
         try{
             User savedUser = LoginServiceImpl.register(user);
 
             Authentication authentication = new UsernamePasswordAuthenticationToken(savedUser.getUuId(), savedUser.getApiKey());
             List<GrantedAuthority> authoritiesForUser = new ArrayList<>();
-            String accessToken = jwtProvider.createAccessToken(savedUser.getUuId(),authoritiesForUser);
+            String accessToken = jwtProvider.createAccessToken(savedUser.getUuId());
             String refreshToken = jwtProvider.createRefreshToken(authentication, authoritiesForUser);
 
             HashMap<String, String> token = new HashMap<>();
             token.put("accessToken", accessToken);
-            token.put("refreshToken", refreshToken);
+            //token.put("refreshToken", refreshToken);
+
+            // create a cookie
+            Cookie cookie = new Cookie("refresh",refreshToken);
+
+            // expires in 31 days
+            cookie.setMaxAge(31 * 24 * 60 * 60);
+
+            // optional properties
+            cookie.setSecure(true);
+            cookie.setHttpOnly(true);
+            cookie.setPath("/");
+
+            response.addCookie(cookie);
 
             return ResponseEntity.ok().body(token);
 
@@ -88,12 +108,47 @@ public class loginController {
     }
 
     @PostMapping("/reissue")
-    public ResponseEntity<?> reissueToken(@AuthenticationPrincipal UserDetails userDetails){
-        String uuId = userDetails.getUsername();
-        List<GrantedAuthority> authorities = new ArrayList<>();
-        String newAccessToken = jwtProvider.createAccessToken(uuId, authorities);
+    public ResponseEntity<?> reissueToken(HttpServletRequest request,
+                                          HttpServletResponse response){
+        try{
+            String refreshToken = jwtProvider.resolveToken(request);
+            String newAccessToken = jwtProvider.reissueAccessToken(refreshToken);
 
-        return ResponseEntity.ok().body(newAccessToken);
+            HashMap<String, String> token = new HashMap<>();
+            token.put("accessToken", newAccessToken);
+
+            return ResponseEntity.ok().body(token);
+        }catch(JwtException e){
+            if(Objects.equals(e.getMessage(), "RefreshToken EXPIRED")) {
+                Authentication authentication = jwtProvider.getAuthentication(jwtProvider.resolveToken(request));
+                List<GrantedAuthority> authoritiesForUser = new ArrayList<>();
+                String refreshToken = jwtProvider.createRefreshToken(authentication, authoritiesForUser);
+                String newAccessToken = jwtProvider.reissueAccessToken(refreshToken);
+
+                HashMap<String, String> token = new HashMap<>();
+                token.put("accessToken", newAccessToken);
+                //token.put("refreshToken", refreshToken);
+
+                // create a cookie
+                Cookie cookie = new Cookie("refresh",refreshToken);
+
+                // expires in 30 days
+                cookie.setMaxAge(31 * 24 * 60 * 60);
+                // optional properties
+                cookie.setSecure(true);
+                cookie.setHttpOnly(true);
+                cookie.setPath("/");
+                response.addCookie(cookie);
+
+                return ResponseEntity.ok().body(token);
+            }
+            else{
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Token재발급 중 에러가 발생하였습니다.");
+            }
+        }
+        catch (Exception e){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("RefreshToken이 유효하지 않습니다.");
+        }
     }
 
     @GetMapping("/test")

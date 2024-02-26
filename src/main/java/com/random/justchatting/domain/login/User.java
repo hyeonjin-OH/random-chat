@@ -8,6 +8,7 @@ import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -19,7 +20,7 @@ public class User {
     private String apiKey;
     private String uuId;
     private String nickName;
-    private List<String> rooms;
+    private List<String> rooms = new ArrayList<>();
 
     @Builder
     public User(Long id, String apiKey, String uuId, String nickName, List<String> rooms) {
@@ -66,6 +67,9 @@ public class User {
     }
 
     public void enterRoom(String roomKey){
+        if(this.rooms == null){
+            this.rooms = new ArrayList<>();
+        }
         this.rooms.add(roomKey);
     }
 

@@ -54,7 +54,8 @@ public class RedisServiceImpl implements RedisService{
 
         // 매칭 시, prefer 중 포지션 부분은 서로 반대되는 것 끼리 매칭시켜줘야 함
         // position은 둘 중 하나임.
-        String position = req.getPrefer().substring(positionIdx + 1).equals("101") ? "100" : "101";
+        String position = req.getPrefer().substring(positionIdx + 1).equals("101") ? "100" :
+                                req.getPrefer().substring(positionIdx + 1).equals("111")?"111":"101";
         String prefer = Integer.toString(req.getOptionCount())+":"+ req.getPrefer().substring(0, positionIdx) + "-" + position;
         int preferCount = req.getPrefer().split(",").length;
 
@@ -84,7 +85,6 @@ public class RedisServiceImpl implements RedisService{
             if (keys.hasNext()) {
                 return checkOptions2(keys, req);
             }
-
         }
         return "";
     }
@@ -140,6 +140,8 @@ public class RedisServiceImpl implements RedisService{
     @Transactional
     public void cancelMatch(MatchReq req) {
         try{
+            redisTemplate.opsForZSet().remove(Integer.toString(req.getOptionCount())+":"+ req.getPrefer(), req.getUuId()+":"+req.getRoomKey());
+
             User user = userRepository.findByUuId(req.getUuId());
             user.exitRoom(req.getRoomKey());
             userRepository.save(user);
@@ -150,7 +152,6 @@ public class RedisServiceImpl implements RedisService{
                 chatRoomRepository.deleteRoom(room);
             }
 
-            redisTemplate.opsForZSet().remove(Integer.toString(req.getOptionCount())+":"+ req.getPrefer(), req.getUuId()+":"+req.getRoomKey());
         }catch (MatchException e){
             throw new MatchException("매칭 취소하는 중 에러가 발생하였습니다.");
         }

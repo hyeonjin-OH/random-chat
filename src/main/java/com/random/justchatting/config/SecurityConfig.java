@@ -73,7 +73,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests((authorizeRequests) ->
                         authorizeRequests
                                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                                .requestMatchers("/", "/register","/test").permitAll()
+                                .requestMatchers("/", "/register","/test", "/logout", "/reissue").permitAll()
                                 .requestMatchers("/api/v1/**").permitAll()
                                 .requestMatchers("/chat/**" ).permitAll()
                                 .requestMatchers("/match/**" ).permitAll()

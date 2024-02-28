@@ -62,17 +62,17 @@ public class MessageController {
         chatRoomRepository.updateLastChat(chat.getRoomKey(), chat.getSendTime(), chat.getMessage());
     }
 
-    @EventListener
-    public void webSocketDisconnectListener(SessionDisconnectEvent event) {
-        log.info("DisConnEvent {}", event);
-
-        StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
-
-        // stomp 세션에 있던 uuid 와 roomId 를 확인해서 채팅방 유저 리스트와 room 에서 해당 유저를 삭제
-        String userUUID = (String) headerAccessor.getSessionAttributes().get("userUUID");
-        String roomKey = (String) headerAccessor.getSessionAttributes().get("roomId");
-
-        log.info("headAccessor {}", headerAccessor);
-    }
+//    @EventListener
+//    public void webSocketDisconnectListener(SessionDisconnectEvent event) {
+//        log.info("DisConnEvent {}", event);
+//
+//        StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
+//
+//        // stomp 세션에 있던 uuid 와 roomId 를 확인해서 채팅방 유저 리스트와 room 에서 해당 유저를 삭제
+//        String userUUID = (String) headerAccessor.getSessionAttributes().get("userUUID");
+//        String roomKey = (String) headerAccessor.getSessionAttributes().get("roomId");
+//
+//        log.info("headAccessor {}", headerAccessor);
+//    }
 
     }

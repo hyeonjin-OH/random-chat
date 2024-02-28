@@ -1,4 +1,8 @@
 package com.random.justchatting.exception.Chat;
 
-public class ChatException {
+public class ChatException extends RuntimeException{
+    public ChatException(String message) {
+        super(message);
+    }
+
 }

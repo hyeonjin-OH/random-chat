@@ -6,9 +6,12 @@ import com.random.justchatting.domain.chat.ChatRoom;
 import com.random.justchatting.domain.chat.ChatRoomReq;
 import com.random.justchatting.domain.login.User;
 import com.random.justchatting.domain.login.UserPrefer;
+import com.random.justchatting.exception.Chat.ChatException;
+import com.random.justchatting.exception.User.UserException;
 import com.random.justchatting.service.chat.ChatService;
 import com.random.justchatting.service.user.UserService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
@@ -21,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Slf4j
 @Controller
 @RequestMapping("/api/v1")
 @RequiredArgsConstructor
@@ -91,12 +95,16 @@ public class ChatController {
 
     @PostMapping("/chattingroom/exit")
     public ResponseEntity<?> exitChattingRoom(@AuthenticationPrincipal UserDetails user, @RequestBody ChatRoomReq room) {
-        chatService.exitChatRoom(room.getRoomKey(), room.getUuId());
-        chatService.deleteChatRoom(room.getRoomKey());
+        try{
+            chatService.exitChatRoom(room.getRoomKey(), room.getUuId());
+            chatService.deleteChatRoom(room.getRoomKey());
 
-        List<ChatRoom> rooms = chatService.findAllRoom(room.getUuId());
-        return ResponseEntity.ok().body(rooms);
-
+            List<ChatRoom> rooms = chatService.findAllRoom(room.getUuId());
+            return ResponseEntity.ok().body(rooms);
+        }catch (UserException | ChatException e){
+            log.warn(e.getMessage());
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
 }

@@ -59,21 +59,26 @@ public class StompHandler implements ChannelInterceptor {
             String info = sessionInfo.get(sessionId);
 
             if (info != null) {
-                String[] parts = info.split("/");
-                String key = parts[0];
-                Integer optionsCount = Integer.valueOf(key.split(":")[0]);
-                String prefer = key.split(":")[1];
-                String value = parts[1];
-                String uuId = value.split(":")[0];
-                String roomKey = value.split(":")[1];
+                String normalDisconnect = accessor.getDestination();
+                assert normalDisconnect != null;
+                if(!normalDisconnect.equals("/disconnect")){
+                    String[] parts = info.split("/");
+                    String key = parts[0];
+                    int optionsCount = Integer.valueOf(key.split(":")[0]);
+                    String prefer = key.split(":")[1];
+                    String value = parts[1];
+                    String uuId = value.split(":")[0];
+                    String roomKey = value.split(":")[1];
 
-                MatchReq req = MatchReq.builder()
-                        .uuId(uuId)
-                        .prefer(prefer)
-                        .optionCount(optionsCount)
-                        .roomKey(roomKey)
-                        .build();
-                redisService.cancelMatch(req);
+                    MatchReq req = MatchReq.builder()
+                            .uuId(uuId)
+                            .prefer(prefer)
+                            .optionCount(optionsCount)
+                            .roomKey(roomKey)
+                            .build();
+                    redisService.cancelMatch(req);
+                }
+
 
             }
             // 세션에서 정보 삭제

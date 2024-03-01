@@ -5,7 +5,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface UserPreferJpaRepository extends JpaRepository<UserPreferEntity, Long> {
 
-    UserPreferEntity findByUserId(Long userId);
-
     UserPreferEntity findByUuId(String uId);
 }

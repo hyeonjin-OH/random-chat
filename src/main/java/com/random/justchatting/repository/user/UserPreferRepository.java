@@ -6,7 +6,5 @@ public interface UserPreferRepository {
 
     UserPrefer save(UserPrefer prefer);
 
-    UserPrefer findByUserId(Long userid);
-
      UserPrefer findByUId(String uId);
 }

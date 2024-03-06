@@ -44,5 +44,10 @@ public class ChatRoomRepositoryImpl implements ChatRoomRepository{
         chatRoomJpaRepository.delete(ChatRoom.toEntity(room));
     }
 
+    @Override
+    public ChatRoom findRoomByRoomId(Long roomId) {
+        return ChatRoom.from(chatRoomJpaRepository.findByRoomId(roomId));
+    }
+
 
 }

@@ -24,4 +24,6 @@ public interface ChatService {
     ChatRoom findRoomInfo(String roomKey);
 
     void deleteChatRoom(String roomKey);
+
+    String findRoomKeyByRoomId(Long roomId);
 }

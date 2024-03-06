@@ -44,6 +44,10 @@ public class ChatServiceImpl implements ChatService{
         return chatRoomRepository.findRoomKeyByRoomIdAndUuId(roomId, uuId).getRoomKey();
     }
 
+    public String findRoomKeyByRoomId(Long roomId){
+        return  chatRoomRepository.findRoomByRoomId(roomId).getRoomKey();
+    }
+
 
     @Override
     @Transactional

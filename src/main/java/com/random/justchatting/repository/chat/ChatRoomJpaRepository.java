@@ -13,4 +13,6 @@ public interface ChatRoomJpaRepository extends JpaRepository<ChatRoomEntity, Lon
     @Query(value="select * from room c where c.room_id = :roomid and (c.receiver_id = :uuid or c.sender_id = :uuid)",
     nativeQuery = true)
     ChatRoomEntity findByRoomIdAndUuId(@Param("roomid")Long roomId, @Param("uuid")String uuId);
+
+    ChatRoomEntity findByRoomId(Long roomId);
 }

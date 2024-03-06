@@ -2,12 +2,9 @@ package com.random.justchatting.config;
 
 import com.random.justchatting.domain.match.MatchReq;
 import com.random.justchatting.service.redis.RedisService;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.EventListener;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.simp.stomp.StompCommand;
@@ -15,7 +12,6 @@ import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
@@ -24,7 +20,6 @@ import java.util.concurrent.ConcurrentHashMap;
 @RequiredArgsConstructor
 public class StompHandler implements ChannelInterceptor {
 
-    private final HttpSession httpSession;
     private final Map<String, String> sessionInfo = new ConcurrentHashMap<>();
     private final RedisService redisService;
 
@@ -78,10 +73,9 @@ public class StompHandler implements ChannelInterceptor {
                             .build();
                     redisService.cancelMatch(req);
                 }
-
-
             }
             // 세션에서 정보 삭제
+            sessionInfo.remove(sessionId);
         }
     }
 }

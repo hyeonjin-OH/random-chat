@@ -29,6 +29,8 @@ public class ChatRoom {
     public static ChatRoom create(){
         ChatRoom chatRoom = new ChatRoom();
         chatRoom.roomKey = UUID.randomUUID().toString();
+        chatRoom.senderId = "";
+        chatRoom.receiverId = "";
         chatRoom.createdTime = LocalDateTime.now();
         chatRoom.lastTime = LocalDateTime.now();
         chatRoom.lastMessage = "";

@@ -26,10 +26,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @Controller
 @RequiredArgsConstructor
@@ -42,7 +39,7 @@ public class loginController {
     private final ObjectMapper objectMapper;
 
     @PostMapping("/register")
-    public ResponseEntity<?> registerLostArk(@RequestBody User user, HttpSession session, HttpServletResponse response){
+    public ResponseEntity<?> registerLostArk(@RequestBody User user, HttpServletResponse response){
         try{
             User savedUser = LoginServiceImpl.register(user);
 
@@ -111,8 +108,16 @@ public class loginController {
     public ResponseEntity<?> reissueToken(HttpServletRequest request,
                                           HttpServletResponse response){
         try{
-            String refreshToken = jwtProvider.resolveToken(request);
-            String newAccessToken = jwtProvider.reissueAccessToken(refreshToken);
+            String refresh = "";
+            Cookie[] requestCookies = request.getCookies();
+            if(requestCookies != null){
+                for(Cookie c : requestCookies){
+                    if(c.getName().equals("refresh")){
+                        refresh = c.getValue();
+                    }
+                }
+            }
+            String newAccessToken = jwtProvider.reissueAccessToken(refresh);
 
             HashMap<String, String> token = new HashMap<>();
             token.put("accessToken", newAccessToken);
@@ -151,8 +156,17 @@ public class loginController {
         }
     }
 
-    @GetMapping("/test")
-    public ResponseEntity<?> checkConnect(){
-        return ResponseEntity.ok().body("CONNECTED");
+    @GetMapping("/logout")
+    public ResponseEntity<?> logout(HttpServletRequest request, HttpServletResponse response){
+
+        Cookie[] requestCookies = request.getCookies();
+        for(int i=0; i< requestCookies.length; i++) {
+            //if(requestCookies[i].getName().equals("refresh") || requestCookies[i].getName().equals("accessToken"))
+            requestCookies[i].setMaxAge(0); // 유효시간을 0으로 설정
+            response.addCookie(requestCookies[i]); // 응답 헤더에 추가
+        }
+        return ResponseEntity.ok().body("로그아웃되었습니다.");
     }
+
+
 }

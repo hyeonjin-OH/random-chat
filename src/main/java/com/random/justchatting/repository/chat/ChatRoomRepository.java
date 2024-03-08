@@ -16,5 +16,6 @@ public interface ChatRoomRepository {
 
     void deleteRoom(ChatRoom room);
 
+    ChatRoom findRoomByRoomId(Long roomId);
 }
 

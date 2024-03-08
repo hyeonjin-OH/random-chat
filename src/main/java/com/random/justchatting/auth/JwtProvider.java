@@ -191,6 +191,17 @@ public class JwtProvider {
         }
     }
 
+    public String resolveToken(String refreshToken) {
+
+        if(StringUtils.hasText(refreshToken) && refreshToken.startsWith("Bearer ")) {
+            return refreshToken.substring(7);
+        } else if(StringUtils.hasText(refreshToken)) {
+            return refreshToken;
+        } else {
+            return null;
+        }
+    }
+
     // 토큰 검증을 위해 사용
     public ErrorCode validateToken(String token) {
         try {

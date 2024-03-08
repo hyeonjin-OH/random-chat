@@ -3,6 +3,7 @@ package com.random.justchatting.service.chat;
 import com.random.justchatting.domain.chat.ChatMessages;
 import com.random.justchatting.domain.chat.ChatRoom;
 import com.random.justchatting.domain.login.User;
+import com.random.justchatting.exception.Chat.ChatException;
 import com.random.justchatting.exception.User.UserException;
 import com.random.justchatting.repository.chat.ChatRepository;
 import com.random.justchatting.repository.chat.ChatRoomRepository;
@@ -41,6 +42,10 @@ public class ChatServiceImpl implements ChatService{
 
     public String findRoomKeyByRoomIdAndUuId(Long roomId, String uuId){
         return chatRoomRepository.findRoomKeyByRoomIdAndUuId(roomId, uuId).getRoomKey();
+    }
+
+    public String findRoomKeyByRoomId(Long roomId){
+        return  chatRoomRepository.findRoomByRoomId(roomId).getRoomKey();
     }
 
 
@@ -102,13 +107,17 @@ public class ChatServiceImpl implements ChatService{
     // 채팅 목록 및 방 모두 삭제
     @Transactional
     public void deleteChatRoom(String roomKey) {
-
-        // 두 사람 모두 퇴장했다면 대화내용 및 방 삭제
-        ChatRoom reloadRoom =chatRoomRepository.findByRoomKey(roomKey);
-        if(reloadRoom.getSenderId().equals("") && reloadRoom.getReceiverId().equals("")) {
-            chatRoomRepository.deleteRoom(chatRoomRepository.findByRoomKey(roomKey));
-            chatRepository.deleteAllMessages(roomKey);
+        try{
+            // 두 사람 모두 퇴장했다면 대화내용 및 방 삭제
+            ChatRoom reloadRoom =chatRoomRepository.findByRoomKey(roomKey);
+            if(reloadRoom.getSenderId().equals("") && reloadRoom.getReceiverId().equals("")) {
+                chatRoomRepository.deleteRoom(chatRoomRepository.findByRoomKey(roomKey));
+                chatRepository.deleteAllMessages(roomKey);
+            }
+        }catch (Exception e){
+            throw new ChatException("채팅방을 삭제하는 중에 문제가 발생하였습니다.");
         }
+
     }
 
 
